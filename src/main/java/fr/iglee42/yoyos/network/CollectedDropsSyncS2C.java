@@ -25,8 +25,8 @@ public class CollectedDropsSyncS2C {
     }
 
     public CollectedDropsSyncS2C(FriendlyByteBuf buf){
-        this.yoyoID = buf.readInt();
-        int size = buf.readInt();
+        this.yoyoID = buf.readVarInt();
+        int size = buf.readVarInt();
 
         drops = new ItemStack[size];
 
@@ -36,8 +36,8 @@ public class CollectedDropsSyncS2C {
     }
 
     public void encode(FriendlyByteBuf buf){
-        buf.writeInt(yoyoID);
-        buf.writeInt(drops.length);
+        buf.writeVarInt(yoyoID);
+        buf.writeVarInt(drops.length);
         for (ItemStack drop : drops) {
             writeBigItemStack(buf,drop);
         }
@@ -75,8 +75,8 @@ public class CollectedDropsSyncS2C {
         if (!buf.readBoolean()) {
             return ItemStack.EMPTY;
         } else {
-            int id = buf.readInt();
-            int count = buf.readInt();
+            int id = buf.readVarInt();
+            int count = buf.readVarInt();
             ItemStack itemstack = new ItemStack(Item.byId(id), count);
             itemstack.readShareTag(buf.readNbt());
             return itemstack;

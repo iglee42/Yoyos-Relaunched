@@ -4,8 +4,13 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import fr.iglee42.yoyos.Yoyos;
 import fr.iglee42.yoyos.common.api.*;
+import fr.iglee42.yoyos.common.init.YoyosEnchantments;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -18,10 +23,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.TierSortingRegistry;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -67,21 +76,91 @@ public class YoyoItem extends TieredItem implements IYoyo {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level p_41422_, List<Component> tooltips, TooltipFlag p_41424_) {
         super.appendHoverText(stack, p_41422_, tooltips, p_41424_);
-        tooltips.add(Component.translatable("tooltip.yoyos.weight", getWeight(stack)));
-        tooltips.add(Component.translatable("tooltip.yoyos.length", getLength(stack)));
+        tooltips.add(Component.translatable("tooltip.yoyos.weight", getWeight(stack)).withStyle(ChatFormatting.GRAY));
+        tooltips.add(Component.translatable("tooltip.yoyos.length", getLength(stack)).withStyle(ChatFormatting.GRAY));
 
         int duration = getDuration(stack);
-        if (duration < 0) tooltips.add(Component.translatable("tooltip.yoyos.duration.infinite"));
-        else tooltips.add(Component.translatable("tooltip.yoyos.duration", duration / 20f));
+        if (duration < 0) tooltips.add(Component.translatable("tooltip.yoyos.duration.infinite").withStyle(ChatFormatting.GRAY));
+        else tooltips.add(Component.translatable("tooltip.yoyos.duration", duration / 20f).withStyle(ChatFormatting.GRAY));
+        if (stack.getEnchantmentLevel(YoyosEnchantments.COLLECTING.get()) > 0) tooltips.add(Component.translatable("tooltip.yoyos.maxCollectedItems",getMaxCollectedDrops(stack) ,getMaxCollectedDrops(stack) / 64).withStyle(ChatFormatting.GRAY));
+
+        tooltips.add(Component.literal(""));
+
+        MutableComponent attackComp = Component.translatable("tooltip.yoyos.attack").withStyle(ChatFormatting.GRAY)
+                .append(Component.literal( ": "))
+                .append(Component.literal(isAttackEnable(stack) ? "✔" : "❌").withStyle(isAttackEnable(stack)? ChatFormatting.GREEN : ChatFormatting.RED));
+        tooltips.add(attackComp);
+        addEnchantmentToTooltip(stack,YoyosEnchantments.COLLECTING.get(),tooltips);
+        addEnchantmentToTooltip(stack,YoyosEnchantments.BREAKING.get(),tooltips);
+        addEnchantmentToTooltip(stack,YoyosEnchantments.CRAFTING.get(),tooltips);
 
         if (stack.isEnchanted())
             tooltips.add(Component.literal(""));
     }
 
+    private static void addEnchantmentToTooltip(ItemStack stack,Enchantment ench,List<Component> tooltips){
+        int level = stack.getEnchantmentLevel(ench);
+        MutableComponent comp = Component.translatable(ench.getDescriptionId()).withStyle(ChatFormatting.GRAY)
+                .append(Component.literal( ": "))
+                .append(Component.literal(isEnchantmentEnable(stack,ForgeRegistries.ENCHANTMENTS.getKey(ench)) ? "✔" : "❌").withStyle(isEnchantmentEnable(stack,ForgeRegistries.ENCHANTMENTS.getKey(ench))? ChatFormatting.GREEN : ChatFormatting.RED));
+        if (ench.getMaxLevel() > 1 && level > 0) comp = comp.append(Component.literal(" ("))
+                .append(Component.translatable("enchantment.level."+level))
+                .append(Component.literal(")"));
+        tooltips.add(comp);
+    }
+
+    public static boolean isAttackEnable(ItemStack stack){
+        return  !stack.getOrCreateTag().contains("attack") || stack.getOrCreateTag().getBoolean("attack");
+    }
+    public static void toggleAttack(ItemStack stack){
+        stack.getOrCreateTag().putBoolean("attack",!isAttackEnable(stack));
+    }
+
+
+    public static boolean isEnchantmentEnable(ItemStack stack, RegistryObject<Enchantment> enchantment){
+        return isEnchantmentEnable(stack,enchantment.getId());
+    }
+
+    public static boolean isEnchantmentEnable(ItemStack stack, ResourceLocation enchantment){
+        return stack.getEnchantmentLevel(ForgeRegistries.ENCHANTMENTS.getValue(enchantment)) > 0 && ((!enchantment.equals(YoyosEnchantments.CRAFTING.getId()) && !stack.getOrCreateTag().contains(enchantment.getPath())) || stack.getOrCreateTag().getBoolean(enchantment.getPath()) && checkEnchantmentCompat(stack,enchantment));
+    }
+
+    private static boolean checkEnchantmentCompat(ItemStack stack, ResourceLocation enchantment) {
+        if (enchantment.equals(YoyosEnchantments.BREAKING.getId())){
+            return !isEnchantmentEnable(stack,YoyosEnchantments.CRAFTING);
+        }
+        if (enchantment.equals(YoyosEnchantments.CRAFTING.getId())){
+            return !isEnchantmentEnable(stack,YoyosEnchantments.BREAKING);
+        }
+        return true;
+    }
+
+    public static void toggleEnchant(ItemStack stack, ResourceLocation enchant){
+        stack.getOrCreateTag().putBoolean(enchant.getPath(),!isEnchantmentEnable(stack, enchant));
+    }
+
+
+
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         if (enchantment == Enchantments.SWEEPING_EDGE) return false;
-        return (interactsWithBlocks(stack) && enchantment == Enchantments.BLOCK_FORTUNE) || enchantment.category == EnchantmentCategory.BREAKABLE || enchantment.category == EnchantmentCategory.WEAPON;
+        return (interactsWithBlocks(stack) && enchantment == Enchantments.BLOCK_FORTUNE) || enchantment.category == EnchantmentCategory.BREAKABLE || enchantment.category == EnchantmentCategory.WEAPON || enchantment.category == YoyosEnchantments.YOYOS_CATEGORY;
+    }
+
+    @Override
+    public boolean isCorrectToolForDrops(ItemStack stack, BlockState state) {
+        if (TierSortingRegistry.isTierSorted(this.getTier())) {
+            return TierSortingRegistry.isCorrectTierForDrops(this.getTier(), state);
+        } else {
+            int i = this.getTier().getLevel();
+            if (i < 3 && state.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
+                return false;
+            } else if (i < 2 && state.is(BlockTags.NEEDS_IRON_TOOL)) {
+                return false;
+            } else {
+                return i >= 1 || !state.is(BlockTags.NEEDS_STONE_TOOL);
+            }
+        }
     }
 
     @Override
@@ -168,7 +247,8 @@ public class YoyoItem extends TieredItem implements IYoyo {
 
     @Override
     public int getMaxCollectedDrops(ItemStack yoyo) {
-        return calculateMaxCollectedDrops(0);
+        return calculateMaxCollectedDrops(yoyo.getEnchantmentLevel(YoyosEnchantments.COLLECTING.
+                get()));
     }
 
 

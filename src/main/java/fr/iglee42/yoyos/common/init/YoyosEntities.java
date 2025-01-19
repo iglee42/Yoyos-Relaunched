@@ -1,14 +1,11 @@
-package fr.iglee42.yoyos.common;
+package fr.iglee42.yoyos.common.init;
 
 import fr.iglee42.yoyos.Yoyos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
+import fr.iglee42.yoyos.common.YoyoEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 
 public class YoyosEntities {

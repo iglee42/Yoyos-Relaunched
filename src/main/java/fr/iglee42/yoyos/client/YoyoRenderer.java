@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
@@ -205,7 +206,7 @@ public class YoyoRenderer extends EntityRenderer<YoyoEntity> {
     }
 
 
-    private void renderCollectedItems(YoyoEntity entity, float pt,PoseStack poseStack,MultiBufferSource source,int color) {
+    private void renderCollectedItems(YoyoEntity entity, float pt,PoseStack poseStack,MultiBufferSource source,int light) {
         var boundTexture = false;
 
 
@@ -214,13 +215,13 @@ public class YoyoRenderer extends EntityRenderer<YoyoEntity> {
             int count = stack.getCount();
             int maxCount = stack.getMaxStackSize();
             while (count > 0){
-                renderItem(i,entity,stack,pt,poseStack,source, color);
+                renderItem(i,entity,stack,pt,poseStack,source, light);
                 count -= maxCount;
             }
         }
     }
 
-    private void renderItem(int i, YoyoEntity yoyo, ItemStack itemStack, float partialTicks, PoseStack poseStack, MultiBufferSource source, int color) {
+    private void renderItem(int i, YoyoEntity yoyo, ItemStack itemStack, float partialTicks, PoseStack poseStack, MultiBufferSource source, int light) {
         poseStack.pushPose();
 
         long seed = ((Item.getId(itemStack.getItem()) * 31L + i) * 31 + itemStack.getCount());
@@ -249,7 +250,7 @@ public class YoyoRenderer extends EntityRenderer<YoyoEntity> {
                     poseStack.translate((double) f7, (double) f9, (double) f6);
                 }
 
-                this.itemRenderer.renderStatic(itemStack, ItemDisplayContext.GROUND,0,0,poseStack,source,Minecraft.getInstance().level, color);
+                this.itemRenderer.renderStatic(itemStack, ItemDisplayContext.GROUND,light,OverlayTexture.NO_OVERLAY,poseStack,source,Minecraft.getInstance().level, 0);
                 poseStack.popPose();
             } else {
 
@@ -259,7 +260,7 @@ public class YoyoRenderer extends EntityRenderer<YoyoEntity> {
                     poseStack.translate((double) f8, (double) f10, 0.0);
                 }
 
-                this.itemRenderer.renderStatic(itemStack, ItemDisplayContext.GROUND,0,0,poseStack,source,Minecraft.getInstance().level, color);
+                this.itemRenderer.renderStatic(itemStack, ItemDisplayContext.GROUND,light,OverlayTexture.NO_OVERLAY,poseStack,source,Minecraft.getInstance().level, 0);
                 poseStack.popPose();
                 poseStack.translate(0.0, 0.0, 0.09375);
             }

@@ -2,10 +2,11 @@ package fr.iglee42.yoyos.common;
 
 import com.mojang.datafixers.util.Pair;
 import fr.iglee42.yoyos.common.api.IYoyo;
+import fr.iglee42.yoyos.common.init.YoyosEnchantments;
+import fr.iglee42.yoyos.common.init.YoyosEntities;
 import fr.iglee42.yoyos.network.CollectedDropsSyncS2C;
 import fr.iglee42.yoyos.network.YoyosNetwork;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.*;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,6 +16,8 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -173,6 +176,40 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
         CASTERS.put(player.getUUID(),this);
     }
 
+
+    /**
+     * @return the amount of stack left uncollected
+     */
+    public ItemStack collectDrop(ItemStack stack) {
+        if (!isCollecting()) return stack;
+
+        int maxTake = getMaxCollectedDrops() - numCollectedDrops;
+
+        ItemStack take = stack.split(maxTake);
+        collectedDrops.add(take);
+        needCollectedSync = true;
+        numCollectedDrops += take.getCount();
+
+        return stack;
+    }
+
+    public void collectDrop(ItemEntity drop) {
+        if (drop == null) return;
+
+        ItemStack stack = drop.getItem();
+        int countBefore = stack.getCount();
+        collectDrop(stack);
+
+        if (countBefore == stack.getCount()) return;
+
+        drop.setItem(stack);
+
+        if (stack.isEmpty()) {
+            drop.setNeverPickUp();
+            drop.remove(RemovalReason.KILLED);
+        }
+        level().playSound(null, drop.getX(), drop.getY(), drop.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.NEUTRAL, 0.2f, ((random.nextFloat() - random.nextFloat()) * 0.7f + 1.0f) * 2.0f);
+    }
     public Vec3 getPlayerHandPos(Player thrower,Float partialTicks) {
 
 
@@ -336,10 +373,22 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
                 }
             }
 
-            YoyosNetwork.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(()->level().getChunkAt(blockPosition())), new CollectedDropsSyncS2C(this));
+            if (!level().isClientSide)YoyosNetwork.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(()->level().getChunkAt(blockPosition())), new CollectedDropsSyncS2C(this));
 
             needCollectedSync = false;
         }
+    }
+
+    public void createItemDropOrCollect(ItemStack stack){
+        ItemStack remaining = stack;
+        if (isCollecting()){
+            remaining = collectDrop(stack);
+
+            if (remaining.isEmpty()) return;
+        }
+        ItemEntity item = new ItemEntity(level(),getX(),getY(),getZ(),remaining);
+        item.setDefaultPickUpDelay();
+        level().addFreshEntity(item);
     }
 
     protected void worldInteraction(){
@@ -802,7 +851,7 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
     }
 
     // maxCollectedDrops
-    public float getMaxCollectedDrops() {
+    public int getMaxCollectedDrops() {
         return this.entityData.get(MAX_COLLECTED_DROPS);
     }
 
@@ -811,7 +860,7 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
     }
 
     public boolean isCollecting(){
-        return getMaxCollectedDrops() > 0;
+        return YoyoItem.isEnchantmentEnable(getYoyoStack(), YoyosEnchantments.COLLECTING) && getMaxCollectedDrops() > 0;
     }
 
     public float getThrowerEyeHeight(){
