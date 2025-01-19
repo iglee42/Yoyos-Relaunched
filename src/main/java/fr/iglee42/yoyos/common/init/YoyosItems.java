@@ -30,7 +30,7 @@ public class YoyosItems {
 
 
 
-    private static Item name(String name) {
+    public static Item name(String name) {
         Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(Yoyos.MODID, name));
         if (item == null) {
             throw new RuntimeException(name + " could not be found in " + ForgeRegistries.ITEMS.getRegistryName());
@@ -41,6 +41,13 @@ public class YoyosItems {
     public static void registerItem(RegisterEvent event) {
         if (!event.getRegistryKey().equals(Registries.ITEM)) return;
         event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,"cord"),()->new Item(new Item.Properties()));
+        event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,"wooden_yoyo"),()->new YoyoItem(Tiers.WOOD).addEntityInteraction(Interaction::attackEntity,Interaction::collectItem).addBlockInteraction(Interaction::breakBlocks,Interaction::craftWithBlock));
+        event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,"stone_yoyo"),()->new YoyoItem(Tiers.STONE).addEntityInteraction(Interaction::attackEntity,Interaction::collectItem).addBlockInteraction(Interaction::breakBlocks,Interaction::craftWithBlock));
+        event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,"copper_yoyo"),()->new YoyoItem(Tiers.GOLD).addEntityInteraction(Interaction::attackEntity,Interaction::collectItem).addBlockInteraction(Interaction::breakBlocks,Interaction::craftWithBlock));
+        event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,"iron_yoyo"),()->new YoyoItem(Tiers.IRON).addEntityInteraction(Interaction::attackEntity,Interaction::collectItem).addBlockInteraction(Interaction::breakBlocks,Interaction::craftWithBlock));
+        event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,"golden_yoyo"),()->new YoyoItem(Tiers.GOLD).addEntityInteraction(Interaction::attackEntity,Interaction::collectItem).addBlockInteraction(Interaction::breakBlocks,Interaction::craftWithBlock));
         event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,"diamond_yoyo"),()->new YoyoItem(Tiers.DIAMOND).addEntityInteraction(Interaction::attackEntity,Interaction::collectItem).addBlockInteraction(Interaction::breakBlocks,Interaction::craftWithBlock));
+        event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,"netherite_yoyo"),()->new YoyoItem(Tiers.NETHERITE).addEntityInteraction(Interaction::attackEntity,Interaction::collectItem).addBlockInteraction(Interaction::breakBlocks,Interaction::craftWithBlock));
+        event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,"creative_yoyo"),()->new YoyoItem(Tiers.NETHERITE).addEntityInteraction(Interaction::attackEntity,Interaction::collectItem).addBlockInteraction(Interaction::breakBlocks,Interaction::craftWithBlock));
     }
 }

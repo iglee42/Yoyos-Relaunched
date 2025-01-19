@@ -3,8 +3,10 @@ package fr.iglee42.yoyos.common;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import fr.iglee42.yoyos.Yoyos;
+import fr.iglee42.yoyos.client.YoyosKeybindings;
 import fr.iglee42.yoyos.common.api.*;
 import fr.iglee42.yoyos.common.init.YoyosEnchantments;
+import fr.iglee42.yoyos.common.init.YoyosItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -83,6 +85,7 @@ public class YoyoItem extends TieredItem implements IYoyo {
         if (duration < 0) tooltips.add(Component.translatable("tooltip.yoyos.duration.infinite").withStyle(ChatFormatting.GRAY));
         else tooltips.add(Component.translatable("tooltip.yoyos.duration", duration / 20f).withStyle(ChatFormatting.GRAY));
         if (stack.getEnchantmentLevel(YoyosEnchantments.COLLECTING.get()) > 0) tooltips.add(Component.translatable("tooltip.yoyos.maxCollectedItems",getMaxCollectedDrops(stack) ,getMaxCollectedDrops(stack) / 64).withStyle(ChatFormatting.GRAY));
+        tooltips.add(Component.translatable("tooltip.yoyos.openMenu",YoyosKeybindings.OPEN_CONFIG.getTranslatedKeyMessage()).withStyle(ChatFormatting.GRAY));
 
         tooltips.add(Component.literal(""));
 
@@ -227,17 +230,17 @@ public class YoyoItem extends TieredItem implements IYoyo {
 
     @Override
     public double getWeight(ItemStack yoyo) {
-        return 1.7;
+        return yoyo.is(YoyosItems.name("creative_yoyo")) ? 0.9 : 1.7;
     }
 
     @Override
     public double getLength(ItemStack yoyo) {
-        return 9.0;
+        return yoyo.is(YoyosItems.name("creative_yoyo")) ? 24 : 9.0;
     }
 
     @Override
     public int getDuration(ItemStack yoyo) {
-        return 400;
+        return yoyo.is(YoyosItems.name("creative_yoyo")) ? -1 : 400;
     }
 
     @Override

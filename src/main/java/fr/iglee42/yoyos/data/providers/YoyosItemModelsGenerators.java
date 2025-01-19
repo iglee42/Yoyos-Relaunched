@@ -13,11 +13,11 @@ public class YoyosItemModelsGenerators extends ItemModelProvider {
     }
 
     @Override
-    protected void registerModels() {
+    public void registerModels() {
 
         ForgeRegistries.ITEMS.getKeys().stream().filter(rs->rs.getNamespace().equals(modid)).forEach(rs->{
             if (!rs.getPath().endsWith("_yoyo")) basicItem(rs);
-            withExistingParent(rs.toString(),"item/handled").texture("layer0",modid+":item/"+rs.getPath().replace("_yoyo",""));
+            withExistingParent(rs.toString(),"item/handheld").texture("layer0",modid+":item/"+rs.getPath().replace("_yoyo",""));
         });
 
     }
