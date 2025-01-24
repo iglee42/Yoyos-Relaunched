@@ -1,8 +1,8 @@
 package fr.iglee42.yoyos.data;
 
 import fr.iglee42.yoyos.Yoyos;
-import fr.iglee42.yoyos.data.providers.YoyosItemModelsGenerators;
-import fr.iglee42.yoyos.data.providers.YoyosLangGenerator;
+import fr.iglee42.yoyos.data.providers.YoyosItemModelsGenerator;
+import fr.iglee42.yoyos.data.providers.YoyosRecipesGenerator;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -19,7 +19,8 @@ public class YoyosDataGenerator {
         ExistingFileHelper helper = event.getExistingFileHelper();
         PackOutput output = event.getGenerator().getPackOutput();
 
-        generator.addProvider(event.includeClient(),new YoyosItemModelsGenerators(output,helper));
+        //generator.addProvider(event.includeServer(),new YoyosRecipesGenerator(output));
+        generator.addProvider(event.includeClient(),new YoyosItemModelsGenerator(output,helper));
         //generator.addProvider(event.includeClient(),new YoyosLangGenerator(output));
     }
 }

@@ -6,7 +6,8 @@
   "refmap": "yoyos.refmap.json",
   "mixins": [
     "EnchantedBookItemMixin",
-    "ItemStackMixin"
+    "ItemStackMixin",
+    "ResourcePackLoaderMixin"
   ],
   "client": [
   ],

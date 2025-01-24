@@ -483,7 +483,7 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
 
 
     protected void updateMotion(){
-        Vec3 motion = getTarget().subtract(getX(),getY() + getDimensions(getPose()).height / 2, getZ()).scale(0.15 + 0.85 * pow(1.1,-(getWeight() * getWeight())));
+        Vec3 motion = getTarget().subtract(getX(),getY() + getDimensions(getPose()).height / 2, getZ()).scale(0.15 + 0.85 * pow(1.1,-((10-getWeight()) * (10-getWeight()))));
 
         if (isInWater()){
             motion = motion.scale(yoyo.getWaterMovementModifier(getYoyoStack()));

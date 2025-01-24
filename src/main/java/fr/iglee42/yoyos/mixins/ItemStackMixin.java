@@ -2,6 +2,8 @@ package fr.iglee42.yoyos.mixins;
 
 import fr.iglee42.yoyos.Yoyos;
 import fr.iglee42.yoyos.common.YoyoItem;
+import fr.iglee42.yoyos.common.init.YoyosEnchantments;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -38,6 +40,8 @@ public abstract class ItemStackMixin {
             CompoundTag compoundtag = enchs.getCompound(i);
             BuiltInRegistries.ENCHANTMENT.getOptional(EnchantmentHelper.getEnchantmentId(compoundtag)).ifPresent((p_41708_) -> {
                 if (ForgeRegistries.ENCHANTMENTS.getKey(p_41708_).getNamespace().equals(Yoyos.MODID) && !(getItem() instanceof YoyoItem)) list.add(p_41708_.getFullname(EnchantmentHelper.getEnchantmentLevel(compoundtag)));
+                if (ForgeRegistries.ENCHANTMENTS.getKey(p_41708_).equals(YoyosEnchantments.CRAFTING.getId()) && !(getItem() instanceof YoyoItem)) list.add(Component.literal("This enchantment is in WIP (work in progress), no usages of it are available").withStyle(ChatFormatting.RED));
+
             });
         }
     }

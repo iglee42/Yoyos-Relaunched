@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import fr.iglee42.yoyos.common.YoyoEntity;
 import fr.iglee42.yoyos.common.api.RenderOrientation;
+import fr.iglee42.yoyos.common.init.YoyosItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -64,6 +65,11 @@ public class YoyoRenderer extends EntityRenderer<YoyoEntity> {
         }
 
         stack.mulPose(Axis.ZP.rotation(((float) entity.getRemainingTime() / entity.getMaxTime())* 2 * 360));
+
+        if (entity.getYoyoStack().is(YoyosItems.name("creative_yoyo"))){
+            stack.mulPose(Axis.ZP.rotation(((float) entity.tickCount / entity.getMaxTime())* 4 * 360));
+
+        }
 
         itemRenderer.renderStatic(entity.getYoyoStack(), ItemDisplayContext.NONE,0,0,stack,p_114489_,Minecraft.getInstance().level,p_114490_);
         stack.popPose();

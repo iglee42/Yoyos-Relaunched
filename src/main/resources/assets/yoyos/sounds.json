@@ -1,0 +1,12 @@
+{
+  "entity.yoyo.throw": {
+    "category": "entities",
+    "sounds": [
+      {
+        "type": "event",
+        "name": "minecraft:entity.fishing_bobber.throw"
+      }
+    ],
+    "subtitle": "entity.yoyo.throw.subtitle"
+  }
+}

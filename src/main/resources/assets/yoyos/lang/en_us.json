@@ -8,9 +8,14 @@
   "item.yoyos.golden_yoyo": "Golden Yoyo",
   "item.yoyos.diamond_yoyo": "Diamond Yoyo",
   "item.yoyos.netherite_yoyo": "Netherite Yoyo",
-  "item.yoyos.creative_yoyo": "Creative Yoyo",
+  "item.yoyos.creative_yoyo": "Rainbowyo",
 
   "item.yoyos.cord": "Cord",
+  "item.yoyos.mana_cord": "Mana Cord",
+  "item.yoyos.cheese_string": "Cheese String",
+  "item.yoyos.cheese_cord": "Cheese Cord",
+
+  "entity.yoyo.throw.subtitle": "Yoyo thrown",
 
   "enchantment.yoyos.collecting": "Collecting",
   "enchantment.yoyos.breaking": "Breaking",

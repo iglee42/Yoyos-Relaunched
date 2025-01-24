@@ -7,11 +7,13 @@ import fr.iglee42.yoyos.client.YoyosKeybindings;
 import fr.iglee42.yoyos.common.api.*;
 import fr.iglee42.yoyos.common.init.YoyosEnchantments;
 import fr.iglee42.yoyos.common.init.YoyosItems;
+import fr.iglee42.yoyos.common.init.YoyosSounds;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -46,17 +48,19 @@ public class YoyoItem extends TieredItem implements IYoyo {
     protected RenderOrientation renderOrientation = RenderOrientation.Vertical;
     protected List<EntityInteraction> entityInteractions = new ArrayList<>();
     protected List<BlockInteraction> blockInteractions = new ArrayList<>();
+    protected YoyoTier yoyoTier;
 
-    public YoyoItem(Properties properties, Tier tier, YoyoFactory factory){
-        super(tier, properties);
-        this.defaultAttackDamage = tier.getAttackDamageBonus() + 3.0f;
+    public YoyoItem(Properties properties, YoyoTier tier, YoyoFactory factory){
+        super(tier.getTier(), properties);
+        this.yoyoTier = tier;
+        this.defaultAttackDamage = tier.getTier().getAttackDamageBonus() + 3.0f;
         this.factory = factory;
     }
 
-    public YoyoItem(Properties properties, Tier tier){
+    public YoyoItem(Properties properties, YoyoTier tier){
         this(properties, tier, YoyoEntity::new);
     }
-    public YoyoItem(Tier tier){
+    public YoyoItem(YoyoTier tier){
         this(new Properties().stacksTo(1), tier);
     }
 
@@ -109,6 +113,8 @@ public class YoyoItem extends TieredItem implements IYoyo {
         if (ench.getMaxLevel() > 1 && level > 0) comp = comp.append(Component.literal(" ("))
                 .append(Component.translatable("enchantment.level."+level))
                 .append(Component.literal(")"));
+        if (ench.equals(YoyosEnchantments.CRAFTING.get()))
+            comp.append(Component.literal(" (WIP, no usages)").withStyle(ChatFormatting.RED));
         tooltips.add(comp);
     }
 
@@ -147,7 +153,7 @@ public class YoyoItem extends TieredItem implements IYoyo {
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         if (enchantment == Enchantments.SWEEPING_EDGE) return false;
-        return (interactsWithBlocks(stack) && enchantment == Enchantments.BLOCK_FORTUNE) || enchantment.category == EnchantmentCategory.BREAKABLE || enchantment.category == EnchantmentCategory.WEAPON || enchantment.category == YoyosEnchantments.YOYOS_CATEGORY;
+        return (interactsWithBlocks(stack) && (enchantment == Enchantments.BLOCK_FORTUNE || enchantment == Enchantments.SILK_TOUCH)) || enchantment.category == EnchantmentCategory.BREAKABLE || enchantment.category == EnchantmentCategory.WEAPON || enchantment.category == YoyosEnchantments.YOYOS_CATEGORY;
     }
 
     @Override
@@ -167,8 +173,8 @@ public class YoyoItem extends TieredItem implements IYoyo {
     }
 
     @Override
-    public boolean isFoil(ItemStack p_41453_) {
-        return super.isFoil(p_41453_);
+    public boolean isFoil(ItemStack stack) {
+        return stack.is(YoyosItems.name("creative_yoyo")) || super.isFoil(stack);
     }
 
     @Override
@@ -192,7 +198,7 @@ public class YoyoItem extends TieredItem implements IYoyo {
                 if (yoyoEntity == null) {
                     yoyoEntity = factory.create(level,player, hand);
                     level.addFreshEntity(yoyoEntity);
-                    //level.playSound(null, it.posX, it.posY, it.posZ, ModSounds.yoyoThrow, SoundCategory.NEUTRAL, 0.5f, 0.4f / (Item.random.nextFloat() * 0.4f + 0.8f))
+                    level.playSound(null, yoyoEntity.getX(), yoyoEntity.getY(), yoyoEntity.getZ(), YoyosSounds.THROW.get(), SoundSource.NEUTRAL, 0.5f, 0.4f / (level.random.nextFloat() * 0.4f + 0.8f));
 
 
                     player.causeFoodExhaustion(0.05f);
@@ -224,23 +230,23 @@ public class YoyoItem extends TieredItem implements IYoyo {
     }
 
     public double getAttackDamage(ItemStack yoyo) {
-        return defaultAttackDamage.doubleValue();
+        return yoyoTier.getDamage();
     }
 
 
     @Override
     public double getWeight(ItemStack yoyo) {
-        return yoyo.is(YoyosItems.name("creative_yoyo")) ? 0.9 : 1.7;
+        return yoyoTier.getWeight();
     }
 
     @Override
     public double getLength(ItemStack yoyo) {
-        return yoyo.is(YoyosItems.name("creative_yoyo")) ? 24 : 9.0;
+        return yoyoTier.getLength();
     }
 
     @Override
     public int getDuration(ItemStack yoyo) {
-        return yoyo.is(YoyosItems.name("creative_yoyo")) ? -1 : 400;
+        return yoyoTier.getDuration();
     }
 
     @Override

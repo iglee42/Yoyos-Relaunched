@@ -3,37 +3,62 @@ package fr.iglee42.yoyos;
 import com.mojang.logging.LogUtils;
 import fr.iglee42.yoyos.client.YoyoRenderer;
 import fr.iglee42.yoyos.client.YoyosKeybindings;
-import fr.iglee42.yoyos.common.init.YoyosEnchantments;
-import fr.iglee42.yoyos.common.init.YoyosEntities;
-import fr.iglee42.yoyos.common.init.YoyosItems;
+import fr.iglee42.yoyos.common.init.*;
+import fr.iglee42.yoyos.compat.IYoyoPlugin;
+import fr.iglee42.yoyos.compat.YoyoPlugin;
+import fr.iglee42.yoyos.compat.YoyoPluginHelper;
 import fr.iglee42.yoyos.network.YoyosNetwork;
+import fr.iglee42.yoyos.resourcepack.PackType;
+import fr.iglee42.yoyos.resourcepack.PathConstant;
+import fr.iglee42.yoyos.resourcepack.YoyosPackFinder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.forgespi.language.ModFileScanData;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
+import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.Type;
 import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.util.*;
 
 @Mod(Yoyos.MODID)
 public class Yoyos {
 
     public static final String MODID = "yoyos";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
+    protected static YoyoPluginHelper pluginHelper;
 
     public Yoyos() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
 
+        try {
+            Config.init();
+        } catch (IOException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        registerPlugins(modEventBus);
+
         modEventBus.addListener(YoyosItems::registerItem);
         YoyosItems.TABS.register(modEventBus);
         YoyosEnchantments.ENCHANTMENTS.register(modEventBus);
         YoyosEntities.ENTITY_TYPES.register(modEventBus);
+        YoyosSounds.SOUNDS.register(modEventBus);
+
+        PathConstant.init();
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::clientSetup);
@@ -43,7 +68,62 @@ public class Yoyos {
 
         modEventBus.addListener(this::addCreative);
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        try {
+            if (FMLEnvironment.dist == Dist.CLIENT) {
+                Minecraft.getInstance().getResourcePackRepository().addPackFinder(new YoyosPackFinder(PackType.RESOURCE));
+            }
+        } catch (Exception ignored) {
+            throw new RuntimeException(ignored);
+        }
+
+    }
+
+    private <T extends IYoyoPlugin> void registerPlugins(IEventBus bus) {
+        pluginHelper = new YoyoPluginHelper();
+        Type annotationType = Type.getType(YoyoPlugin.class);
+        Set<String> pluginClassNames = getClassesWithAnnotation(annotationType);
+        List<T> loadedPlugins = new ArrayList<>();
+        for (String className : pluginClassNames) {
+            try {
+                Class<?> asmClass = Class.forName(className);
+                Class<T> asmInstanceClass = (Class<T>) asmClass.asSubclass(IYoyoPlugin.class);
+                T instance = asmInstanceClass.getDeclaredConstructor().newInstance();
+                if (instance.shouldLoad())loadedPlugins.add(instance);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+        loadedPlugins.forEach(p->{
+            p.registerYoyos(pluginHelper);
+        });
+
+        try {
+            pluginHelper.init();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        YoyoPluginHelper.setPlugins((List<IYoyoPlugin>) loadedPlugins);
+
+        bus.addListener(YoyoPluginHelper::registerItem);
+    }
+
+    private static @NotNull Set<String> getClassesWithAnnotation(Type annotationType) {
+        List<ModFileScanData> allScanData = ModList.get().getAllScanData();
+        Set<String> pluginClassNames = new LinkedHashSet<>();
+        for (ModFileScanData scanData : allScanData) {
+            Iterable<ModFileScanData.AnnotationData> annotations = scanData.getAnnotations();
+            for (ModFileScanData.AnnotationData a : annotations) {
+                if (Objects.equals(a.annotationType(), annotationType)) {
+                    String memberName = a.memberName();
+                    pluginClassNames.add(memberName);
+                }
+            }
+        }
+        return pluginClassNames;
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

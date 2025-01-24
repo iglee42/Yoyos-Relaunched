@@ -1,14 +1,13 @@
 package fr.iglee42.yoyos.data.providers;
 
 import fr.iglee42.yoyos.Yoyos;
-import fr.iglee42.yoyos.common.init.YoyosItems;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class YoyosItemModelsGenerators extends ItemModelProvider {
-    public YoyosItemModelsGenerators(PackOutput output, ExistingFileHelper existingFileHelper) {
+public class YoyosItemModelsGenerator extends ItemModelProvider {
+    public YoyosItemModelsGenerator(PackOutput output, ExistingFileHelper existingFileHelper) {
         super(output, Yoyos.MODID, existingFileHelper);
     }
 

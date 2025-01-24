@@ -18,7 +18,7 @@ plugins {
 apply plugin: 'org.spongepowered.mixin'
 
 group = mod_group_id
-version = mod_version
+version = minecraft_version + "-" + mod_version
 
 base {
     archivesName = mod_id
@@ -142,6 +142,15 @@ repositories {
     maven {
         url "https://iglee.fr:8081/releases"
     }
+
+    repositories {
+        maven {
+            url "https://cursemaven.com"
+            content {
+                includeGroup "curse.maven"
+            }
+        }
+    }
 }
 
 dependencies {
@@ -163,6 +172,17 @@ dependencies {
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
     // The group id is ignored when searching -- in this case, it is "blank"
     // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
+
+    implementation fg.deobf("curse.maven:botania-225643:5594997")
+    implementation fg.deobf("curse.maven:patchouli-306770:4966125")
+    implementation fg.deobf("curse.maven:curios-309927:6058834")
+
+    implementation fg.deobf("curse.maven:create-328085:5838779")
+
+    implementation fg.deobf("curse.maven:ad-astra-635042:5914893")
+    implementation fg.deobf("curse.maven:botarium-704113:5486070")
+    implementation fg.deobf("curse.maven:resourceful-config-714059:5020441")
+    implementation fg.deobf("curse.maven:resourceful-lib-570073:5659871")
 
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
