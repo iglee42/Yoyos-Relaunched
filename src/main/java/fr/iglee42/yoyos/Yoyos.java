@@ -61,11 +61,14 @@ public class Yoyos {
         PathConstant.init();
 
         modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::clientSetup);
+
+
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            modEventBus.addListener(this::clientSetup);
+            MinecraftForge.EVENT_BUS.addListener(YoyosKeybindings::handleEventInput);
+        }
 
         MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.addListener(YoyosKeybindings::handleEventInput);
-
         modEventBus.addListener(this::addCreative);
 
         try {
