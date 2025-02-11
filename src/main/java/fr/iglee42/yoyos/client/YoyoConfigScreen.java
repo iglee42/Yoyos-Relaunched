@@ -28,7 +28,7 @@ public class YoyoConfigScreen extends Screen {
         addRenderableWidget(new ExpandingWidget(width / 2 -1,height / 2 - 44,40,40,2,widget->{
             YoyosNetwork.CHANNEL.sendToServer(new ToggleYoyoEnchantC2S(YoyosEnchantments.COLLECTING.getId(), InteractionHand.MAIN_HAND));
         },()-> YoyoItem.isEnchantmentEnable(minecraft.player.getMainHandItem(), YoyosEnchantments.COLLECTING.getId()),Items.HOPPER,
-                Component.translatable(YoyosEnchantments.COLLECTING.get().getDescriptionId()),()-> Minecraft.getInstance().player.getMainHandItem().getEnchantmentLevel(YoyosEnchantments.COLLECTING.get()) > 0));
+                Component.translatable(YoyosEnchantments.COLLECTING.get().getDescriptionId()),()-> ((YoyoItem)Minecraft.getInstance().player.getMainHandItem().getItem()).getMaxCollectedDrops(Minecraft.getInstance().player.getMainHandItem()) > 0));
         addRenderableWidget(new ExpandingWidget(width / 2 -1,height / 2 + 1,40,40,2,widget->{
             YoyosNetwork.CHANNEL.sendToServer(new ToggleYoyoEnchantC2S(YoyosEnchantments.BREAKING.getId(), InteractionHand.MAIN_HAND));
         },()-> YoyoItem.isEnchantmentEnable(minecraft.player.getMainHandItem(), YoyosEnchantments.BREAKING.getId()), Items.DIAMOND_PICKAXE,

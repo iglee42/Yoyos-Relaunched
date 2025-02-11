@@ -88,7 +88,7 @@ public class YoyoItem extends TieredItem implements IYoyo {
         int duration = getDuration(stack);
         if (duration < 0) tooltips.add(Component.translatable("tooltip.yoyos.duration.infinite").withStyle(ChatFormatting.GRAY));
         else tooltips.add(Component.translatable("tooltip.yoyos.duration", duration / 20f).withStyle(ChatFormatting.GRAY));
-        if (stack.getEnchantmentLevel(YoyosEnchantments.COLLECTING.get()) > 0) tooltips.add(Component.translatable("tooltip.yoyos.maxCollectedItems",getMaxCollectedDrops(stack) ,getMaxCollectedDrops(stack) / 64).withStyle(ChatFormatting.GRAY));
+        if (getMaxCollectedDrops(stack) > 0) tooltips.add(Component.translatable("tooltip.yoyos.maxCollectedItems",getMaxCollectedDrops(stack) ,getMaxCollectedDrops(stack) / 64).withStyle(ChatFormatting.GRAY));
         tooltips.add(Component.translatable("tooltip.yoyos.openMenu",YoyosKeybindings.OPEN_CONFIG.getTranslatedKeyMessage()).withStyle(ChatFormatting.GRAY));
 
         tooltips.add(Component.literal(""));
@@ -131,7 +131,16 @@ public class YoyoItem extends TieredItem implements IYoyo {
     }
 
     public static boolean isEnchantmentEnable(ItemStack stack, ResourceLocation enchantment){
-        return stack.getEnchantmentLevel(ForgeRegistries.ENCHANTMENTS.getValue(enchantment)) > 0 && ((!enchantment.equals(YoyosEnchantments.CRAFTING.getId()) && !stack.getOrCreateTag().contains(enchantment.getPath())) || stack.getOrCreateTag().getBoolean(enchantment.getPath()) && checkEnchantmentCompat(stack,enchantment));
+        if (enchantment.equals(YoyosEnchantments.COLLECTING.getId()) && !stack.isEmpty()){
+            return ((YoyoItem)stack.getItem()).getMaxCollectedDrops(stack) > 0 && (!stack.getOrCreateTag().contains(enchantment.getPath())) ||
+                    stack.getOrCreateTag().getBoolean(enchantment.getPath());
+        }
+
+        return stack.getEnchantmentLevel(ForgeRegistries.ENCHANTMENTS.getValue(enchantment)) > 0
+                && ((!enchantment.equals(YoyosEnchantments.CRAFTING.getId()) &&
+                !stack.getOrCreateTag().contains(enchantment.getPath())) ||
+                stack.getOrCreateTag().getBoolean(enchantment.getPath()) &&
+                        checkEnchantmentCompat(stack,enchantment));
     }
 
     private static boolean checkEnchantmentCompat(ItemStack stack, ResourceLocation enchantment) {
