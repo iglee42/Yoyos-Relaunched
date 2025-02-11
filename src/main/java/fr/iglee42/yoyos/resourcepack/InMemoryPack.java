@@ -48,6 +48,7 @@ public class InMemoryPack implements PackResources {
             ModelsGenerator.generate();
             LangsGenerator.generate();
             RecipesGenerator.generate();
+            TagsGenerator.generate();
 
             hasGenerated = true;
         }

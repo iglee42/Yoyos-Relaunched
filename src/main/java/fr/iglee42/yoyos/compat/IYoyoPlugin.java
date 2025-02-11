@@ -1,7 +1,12 @@
 package fr.iglee42.yoyos.compat;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.RegisterEvent;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public interface IYoyoPlugin {
 
@@ -14,5 +19,6 @@ public interface IYoyoPlugin {
     void registerYoyos(YoyoPluginHelper helper);
 
     default void registerItems(RegisterEvent event) {};
+    default Map<ResourceLocation, List<String>> addTags() { return new HashMap<>();};
 
 }
