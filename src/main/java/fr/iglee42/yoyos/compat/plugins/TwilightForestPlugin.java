@@ -24,7 +24,8 @@ public class TwilightForestPlugin implements IYoyoPlugin {
                 .setWeight(4.5)
                 .setLength(9.0)
                 .setDuration(350)
-                .setDamage(5.5));
+                .setDamage(5.5)
+                .setCustomItem("naga_scale"));
         helper.registerYoyo(new YoyoTier("knightmetal",Tiers.DIAMOND,modId())
                 .setWeight(5.0)
                 .setLength(9.0)
