@@ -1,5 +1,6 @@
 package fr.iglee42.yoyos.compat.plugins;
 
+import fr.iglee42.yoyos.common.YoyoTier;
 import fr.iglee42.yoyos.compat.IYoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPluginHelper;
@@ -14,7 +15,20 @@ public class DraconicEvolution implements IYoyoPlugin {
 
     @Override
     public void registerYoyos(YoyoPluginHelper helper) {
-        helper.registerYoyo("draconium",6.0,8.0,450,6.0,Tiers.DIAMOND,this);
-        helper.registerYoyo("awakened_draconium",7.0,18.0,800,9.0, Tiers.NETHERITE,this);
+        helper.registerYoyo(new YoyoTier("draconium",Tiers.DIAMOND,modId())
+                .setWeight(6.0)
+                .setLength(8.0)
+                .setDuration(450)
+                .setDamage(6.0));
+        helper.registerYoyo(new YoyoTier("awakened_draconium",Tiers.NETHERITE,modId())
+                .setWeight(7.0)
+                .setLength(18.0)
+                .setDuration(800)
+                .setDamage(9.0));
+        helper.registerYoyo(new YoyoTier("chaotic",Tiers.NETHERITE,modId())
+                .setWeight(7.5)
+                .setLength(18.0)
+                .setDuration(800)
+                .setDamage(10.0));
     }
 }

@@ -3,7 +3,10 @@ package fr.iglee42.yoyos;
 import com.mojang.logging.LogUtils;
 import fr.iglee42.yoyos.client.YoyoRenderer;
 import fr.iglee42.yoyos.client.YoyosKeybindings;
-import fr.iglee42.yoyos.common.init.*;
+import fr.iglee42.yoyos.common.init.YoyosEnchantments;
+import fr.iglee42.yoyos.common.init.YoyosEntities;
+import fr.iglee42.yoyos.common.init.YoyosItems;
+import fr.iglee42.yoyos.common.init.YoyosSounds;
 import fr.iglee42.yoyos.compat.IYoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPluginHelper;
@@ -13,6 +16,7 @@ import fr.iglee42.yoyos.resourcepack.PathConstant;
 import fr.iglee42.yoyos.resourcepack.YoyosPackFinder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.core.registries.Registries;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -61,6 +65,7 @@ public class Yoyos {
         PathConstant.init();
 
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::registerEvent);
 
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
@@ -99,6 +104,7 @@ public class Yoyos {
         }
 
         loadedPlugins.forEach(p->{
+            p.init(pluginHelper);
             p.registerYoyos(pluginHelper);
         });
 
@@ -109,9 +115,7 @@ public class Yoyos {
         }
 
 
-        YoyoPluginHelper.setPlugins((List<IYoyoPlugin>) loadedPlugins);
-
-        bus.addListener(YoyoPluginHelper::registerItem);
+        pluginHelper.setPlugins((List<IYoyoPlugin>) loadedPlugins);
     }
 
     private static @NotNull Set<String> getClassesWithAnnotation(Type annotationType) {
@@ -137,11 +141,20 @@ public class Yoyos {
         EntityRenderers.register(YoyosEntities.YOYO.get(), YoyoRenderer::new);
     }
 
+    private void registerEvent(RegisterEvent event){
+       if (event.getRegistryKey().equals(Registries.ITEM))
+            pluginHelper.registerItems(event);
+    }
+
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() != YoyosItems.TAB.getKey()) return;
         ForgeRegistries.ITEMS.getKeys().stream().filter(rs->rs.getNamespace().equals(MODID)).forEach(rs->{
             event.accept(ForgeRegistries.ITEMS.getDelegateOrThrow(rs));
         });
+    }
+
+    public static YoyoPluginHelper getPluginHelper() {
+        return pluginHelper;
     }
 }

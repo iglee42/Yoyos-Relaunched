@@ -8,60 +8,32 @@ import fr.iglee42.yoyos.Yoyos;
 import fr.iglee42.yoyos.common.Interaction;
 import fr.iglee42.yoyos.common.YoyoItem;
 import fr.iglee42.yoyos.common.YoyoTier;
-import fr.iglee42.yoyos.resourcepack.InMemoryPack;
-import fr.iglee42.yoyos.resourcepack.PackType;
-import fr.iglee42.yoyos.resourcepack.YoyosPackFinder;
-import net.minecraft.client.Minecraft;
+import fr.iglee42.yoyos.common.api.BlockInteraction;
+import fr.iglee42.yoyos.common.api.EntityInteraction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Tier;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.RegisterEvent;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class YoyoPluginHelper {
 
-    public static List<IYoyoPlugin> PLUGINS = new ArrayList<>();
-    public static final Map<String,String> YOYO_BY_PLUGIN = new HashMap<>();
-    public static final List<YoyoTier> YOYO_TIERS = new ArrayList<>();
+    public List<IYoyoPlugin> plugins = new ArrayList<>();
+    public final List<YoyoTier> YOYO_TIERS = new ArrayList<>();
+    private final List<YoyoTier> tempsYoyo = new ArrayList<>();
 
-    public static final Map<String,String> YOYO_BY_MODS = new HashMap<>();
-    public static final Map<String,String> CUSTOM_CORD = new HashMap<>();
-    public static final Map<String,String> CUSTOM_ITEM = new HashMap<>();
-    public static final Map<String, Constructor<? extends YoyoItem>> CUSTOM_CONSTRUCTOR = new HashMap<>();
-
-
-    private static final List<YoyoTier> tempsYoyo = new ArrayList<>();
-
-    public void registerYoyo(String name, double weight, double length, int duration, double damage, Tier tier,IYoyoPlugin plugin){
-        if (tempsYoyo.stream().anyMatch(t->t.getName().equalsIgnoreCase(name))) return;
-        tempsYoyo.add(new YoyoTier(name, weight, length, duration, damage, tier));
-        YOYO_BY_PLUGIN.put( name,plugin.modId());
-        YOYO_BY_MODS.put( name,plugin.modId());
+    public void registerYoyo(YoyoTier yoyoTier){
+        if (tempsYoyo.stream().anyMatch(y->y.getName().equals(yoyoTier.getName()))) return;
+        tempsYoyo.add(yoyoTier);
     }
 
-    public void setCustomCord(String name, String cord){
-        CUSTOM_CORD.put(name,cord);
-    }
 
-    public void setCustomItem(String name, String item){
-        CUSTOM_ITEM.put(name,item);
-    }
-    public void setCustomConstructor(String name,@Nullable Constructor<? extends YoyoItem> constructor){
-        if (constructor == null) return;
-        CUSTOM_CONSTRUCTOR.put(name,constructor);
-    }
 
     public void init() throws IOException {
         if (Config.getConfigFile().exists()) {
@@ -84,27 +56,30 @@ public class YoyoPluginHelper {
 
     }
 
-    public static void setPlugins(List<IYoyoPlugin> PLUGINS) {
-        YoyoPluginHelper.PLUGINS = PLUGINS;
+    public void setPlugins(List<IYoyoPlugin> plugins) {
+        this.plugins = plugins;
     }
 
-    public static void registerItem(RegisterEvent event) {
-        if (!event.getRegistryKey().equals(Registries.ITEM)) return;
-       YOYO_TIERS.forEach(t->{
-           event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,t.getName().toLowerCase() + "_yoyo"),
-                   ()->{
-               if (CUSTOM_CONSTRUCTOR.containsKey(t.getName().toLowerCase())){
-                   try {
-                       return CUSTOM_CONSTRUCTOR.get(t.getName().toLowerCase()).newInstance(t).addEntityInteraction(Interaction::attackEntity,Interaction::collectItem).addBlockInteraction(Interaction::breakBlocks,Interaction::craftWithBlock);
-                   } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-                       return new YoyoItem(t).addEntityInteraction(Interaction::attackEntity,Interaction::collectItem).addBlockInteraction(Interaction::breakBlocks,Interaction::craftWithBlock);
-                   }
-               } else {
-                   return new YoyoItem(t).addEntityInteraction(Interaction::attackEntity,Interaction::collectItem).addBlockInteraction(Interaction::breakBlocks,Interaction::craftWithBlock);
-               }
+    public void registerItems(RegisterEvent event) {
+        YOYO_TIERS.forEach(t -> {
+            event.register(Registries.ITEM, new ResourceLocation(Yoyos.MODID, t.getName().toLowerCase() + "_yoyo"), () -> {
+                //item = item.addBlockInteraction(t.getBlockInteractions().toArray(new BlockInteraction[]{}));
+                //item = item.addEntityInteraction(t.getEntityInteractions().toArray(new EntityInteraction[]{}));
+                if (t.getCustomConstructor() != null){
+
+                    try {
+                        return t.getCustomConstructor().newInstance(t).addEntityInteraction(t.getEntityInteractions().toArray(new EntityInteraction[]{})).addBlockInteraction(t.getBlockInteractions().toArray(new BlockInteraction[]{}));
+                    } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {
+                        return new YoyoItem(t).addEntityInteraction(t.getEntityInteractions().toArray(new EntityInteraction[]{})).addBlockInteraction(t.getBlockInteractions().toArray(new BlockInteraction[]{}));
+                    }
+                } else {
+                  return new YoyoItem(t).addEntityInteraction(t.getEntityInteractions().toArray(new EntityInteraction[]{})).addBlockInteraction(t.getBlockInteractions().toArray(new BlockInteraction[]{}));
+
+                }
             });
-       });
-        PLUGINS.forEach(p->p.registerItems(event));
+        });
+        plugins.forEach(p -> p.registerItems(event));
     }
+
 
 }

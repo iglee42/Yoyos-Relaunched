@@ -1,5 +1,6 @@
 package fr.iglee42.yoyos.compat.plugins;
 
+import fr.iglee42.yoyos.common.YoyoTier;
 import fr.iglee42.yoyos.compat.IYoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPluginHelper;
@@ -14,6 +15,10 @@ public class RedstoneArsenalPlugin implements IYoyoPlugin {
 
     @Override
     public void registerYoyos(YoyoPluginHelper helper) {
-        helper.registerYoyo("flux",6.5,14.0,400,6.5, Tiers.DIAMOND,this);
+        helper.registerYoyo(new YoyoTier("flux",Tiers.DIAMOND,modId())
+                .setWeight(6.5)
+                .setLength(14.0)
+                .setDuration(400)
+                .setDamage(6.5));
     }
 }

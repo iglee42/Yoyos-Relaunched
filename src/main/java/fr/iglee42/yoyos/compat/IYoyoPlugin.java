@@ -20,5 +20,6 @@ public interface IYoyoPlugin {
 
     default void registerItems(RegisterEvent event) {};
     default Map<ResourceLocation, List<String>> addTags() { return new HashMap<>();};
+    default void init(YoyoPluginHelper helper){}
 
 }

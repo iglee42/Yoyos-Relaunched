@@ -11,7 +11,6 @@ import net.minecraft.resources.ResourceLocation;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +19,7 @@ public class TagsGenerator {
 
     public static void generate() {
 
-        YoyoPluginHelper.PLUGINS.forEach(p->{
+        Yoyos.getPluginHelper().plugins.forEach(p->{
             Map<ResourceLocation,List<String>> tags = p.addTags();
             tags.forEach((tag,item)->{
                 try {

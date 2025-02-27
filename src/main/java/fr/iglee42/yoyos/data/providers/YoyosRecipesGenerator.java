@@ -2,7 +2,7 @@ package fr.iglee42.yoyos.data.providers;
 
 import fr.iglee42.yoyos.Yoyos;
 import fr.iglee42.yoyos.common.init.YoyosItems;
-import fr.iglee42.yoyos.common.init.YoyosTiers;
+import fr.iglee42.yoyos.common.YoyosTiers;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;

@@ -1,5 +1,6 @@
 package fr.iglee42.yoyos.compat.plugins;
 
+import fr.iglee42.yoyos.common.YoyoTier;
 import fr.iglee42.yoyos.compat.IYoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPluginHelper;
@@ -14,7 +15,15 @@ public class ForbiddenArcanusPlugin implements IYoyoPlugin {
 
     @Override
     public void registerYoyos(YoyoPluginHelper helper) {
-        helper.registerYoyo("deorum",6.0,11.0,550,6.5,Tiers.DIAMOND,this);
-        helper.registerYoyo("obsidian",6.5,6.0,600,6.0, Tiers.DIAMOND,this);
+        helper.registerYoyo(new YoyoTier("deorum",Tiers.DIAMOND,modId())
+                .setWeight(6.0)
+                .setLength(11.0)
+                .setDuration(550)
+                .setDamage(6.5));
+        helper.registerYoyo(new YoyoTier("obsidian",Tiers.DIAMOND,modId())
+                .setWeight(6.5)
+                .setLength(6.0)
+                .setDuration(600)
+                .setDamage(6.0));
     }
 }

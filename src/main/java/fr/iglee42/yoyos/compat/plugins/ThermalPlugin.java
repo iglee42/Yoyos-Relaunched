@@ -1,10 +1,18 @@
 package fr.iglee42.yoyos.compat.plugins;
 
+import fr.iglee42.yoyos.common.YoyoItem;
+import fr.iglee42.yoyos.common.YoyoTier;
 import fr.iglee42.yoyos.compat.IYoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPluginHelper;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Tiers;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fml.ModList;
+
+import java.util.UUID;
 
 @YoyoPlugin
 public class ThermalPlugin implements IYoyoPlugin {
@@ -15,21 +23,89 @@ public class ThermalPlugin implements IYoyoPlugin {
 
     @Override
     public void registerYoyos(YoyoPluginHelper helper) {
-        helper.registerYoyo("nickel",5.0,8.0,300,5.0,Tiers.IRON,this);
-        helper.registerYoyo("tin",5.0,8.0,300,5.0,Tiers.IRON,this);
-        helper.registerYoyo("lead",6.0,8.0,300,5.0,Tiers.IRON,this);
-        helper.registerYoyo("silver",5.5,8.0,300,5.0,Tiers.IRON,this);
-        helper.registerYoyo("bronze",5.0,9.0,500,6.0,Tiers.DIAMOND,this);
-        helper.registerYoyo("constantan",5.0,9.0,500,6.0,Tiers.DIAMOND,this);
-        helper.registerYoyo("invar",5.0,9.0,500,6.0,Tiers.DIAMOND,this);
-        helper.registerYoyo("electrum",6.0,9.0,500,6.0,Tiers.DIAMOND,this);
-        helper.registerYoyo("lumium",3.5,10.0,550,6.5,Tiers.NETHERITE,this);
-        helper.registerYoyo("signalum",4.0,10.0,550,6.5,Tiers.NETHERITE,this);
-        helper.registerYoyo("enderium",4.5,12.0,600,7.0, Tiers.NETHERITE,this);
+        helper.registerYoyo(new YoyoTier("nickel",Tiers.IRON,modId())
+                .setWeight(5.0)
+                .setLength(8.0)
+                .setDuration(300)
+                .setDamage(5.0));
+        helper.registerYoyo(new YoyoTier("tin",Tiers.IRON,modId())
+                .setWeight(5.0)
+                .setLength(8.0)
+                .setDuration(300)
+                .setDamage(5.0));
+        helper.registerYoyo(new YoyoTier("lead",Tiers.IRON,modId())
+                .setWeight(6.0)
+                .setLength(8.0)
+                .setDuration(300)
+                .setDamage(5.0));
+        helper.registerYoyo(new YoyoTier("silver",Tiers.IRON,modId())
+                .setWeight(5.5)
+                .setLength(8.0)
+                .setDuration(300)
+                .setDamage(5.0));
+        helper.registerYoyo(new YoyoTier("bronze",Tiers.DIAMOND,modId())
+                .setWeight(5.0)
+                .setLength(9.0)
+                .setDuration(500)
+                .setDamage(6.0));
+        helper.registerYoyo(new YoyoTier("constantan",Tiers.DIAMOND,modId())
+                .setWeight(5.0)
+                .setLength(9.0)
+                .setDuration(500)
+                .setDamage(6.0));
+        helper.registerYoyo(new YoyoTier("invar",Tiers.DIAMOND,modId())
+                .setWeight(5.0)
+                .setLength(9.0)
+                .setDuration(500)
+                .setDamage(6.0));
+        helper.registerYoyo(new YoyoTier("electrum",Tiers.DIAMOND,modId())
+                .setWeight(6.0)
+                .setLength(9.0)
+                .setDuration(500)
+                .setDamage(6.0));
+        helper.registerYoyo(new YoyoTier("lumium",Tiers.NETHERITE,modId())
+                .setWeight(3.5)
+                .setLength(10.0)
+                .setDuration(550)
+                .setDamage(6.5)
+                .addEntityInteraction((yoyoStack, player, hand, yoyo, target) -> {
+                    if (!yoyo.canAttack() || !target.isAlive()) return false;
+                    if (!YoyoItem.isAttackEnable(yoyoStack)) return false;
+                    if (!ForgeHooks.onPlayerAttackTarget(player, target)) return false;
+
+                    UUID entityUUID = target.getUUID();
+
+                    if ((player.getShoulderEntityLeft().contains("UUID") && entityUUID.equals(player.getShoulderEntityLeft().getUUID("UUID"))) || (player.getShoulderEntityRight().contains("UUID") && entityUUID.equals(player.getShoulderEntityRight().getUUID("UUID"))))
+                        return false;
+
+                    if (target.isAttackable()){
+                        if (target instanceof LivingEntity lv)lv.addEffect(new MobEffectInstance(MobEffects.GLOWING,300));
+                    }
+                    return true;
+                }));
+        helper.registerYoyo(new YoyoTier("signalum",Tiers.NETHERITE,modId())
+                .setWeight(4.0)
+                .setLength(10.0)
+                .setDuration(550)
+                .setDamage(6.5));
+        helper.registerYoyo(new YoyoTier("enderium",Tiers.NETHERITE,modId())
+                .setWeight(4.5)
+                .setLength(12.0)
+                .setDuration(600)
+                .setDamage(7.0));
+
 
         if (ModList.get().isLoaded("thermal_integration")){
-            helper.registerYoyo("steel",5.5,9.0,500,6.0,Tiers.DIAMOND,this);
-            helper.registerYoyo("rose_gold",5.5,10.0,500,5.0,Tiers.IRON,this);
+            helper.registerYoyo(new YoyoTier("steel",Tiers.IRON,modId())
+                    .setWeight(5.5)
+                    .setLength(9.0)
+                    .setDuration(500)
+                    .setDamage(6.0));
+            helper.registerYoyo(new YoyoTier("rose_gold",Tiers.IRON,modId())
+                    .setWeight(5.5)
+                    .setLength(10.0)
+                    .setDuration(500)
+                    .setDamage(5.0));
         }
     }
 }

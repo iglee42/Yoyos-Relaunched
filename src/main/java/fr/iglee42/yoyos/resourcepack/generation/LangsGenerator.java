@@ -19,7 +19,7 @@ public class LangsGenerator {
     private static Map<String,String> langs = new HashMap<>();
     public static void generate() {
 
-        YoyoPluginHelper.YOYO_TIERS.forEach(t->{
+        Yoyos.getPluginHelper().YOYO_TIERS.forEach(t->{
             langs.put("item."+MODID+"."+t.getName().toLowerCase()+"_yoyo",ModsUtils.getUpperName(t.getName().toLowerCase() + "_yoyo","_"));
         });
 

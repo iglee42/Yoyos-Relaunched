@@ -2,36 +2,67 @@ package fr.iglee42.yoyos.common;
 
 import com.google.gson.JsonObject;
 import fr.iglee42.igleelib.api.utils.JsonHelper;
+import fr.iglee42.yoyos.Yoyos;
+import fr.iglee42.yoyos.common.api.BlockInteraction;
+import fr.iglee42.yoyos.common.api.EntityInteraction;
+import fr.iglee42.yoyos.compat.YoyoPluginHelper;
 import net.minecraft.world.item.Tier;
-import net.minecraftforge.common.ForgeConfigSpec;
+
+import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class YoyoTier {
-    private String name;
-    private double weight;
-    private double length;
-    private int duration;
-    private double damage;
-    private Tier tier;
+    private final String name;
+    private double weight = 1.0;
+    private double length = 3.0;
+    private int duration = 100;
+    private double damage = 1.0;
+    private final Tier tier;
+    private final String plugin;
+    private final List<BlockInteraction> blockInteractions = new ArrayList<>(List.of(Interaction::breakBlocks,Interaction::craftWithBlock));
+    private final List<EntityInteraction> entityInteractions = new ArrayList<>(List.of(Interaction::attackEntity,Interaction::collectItem));
+    private Constructor<? extends YoyoItem> customConstructor = null;
+    private String customItem = "";
+    private String customCord = "";
+    private String mod = "";
 
-    public YoyoTier(String name, double weight, double length, int duration, double damage, Tier tier) {
+    public YoyoTier(String name,Tier tier,String plugin){
         this.name = name;
+        this.tier = tier;
+        this.plugin = plugin;
+    }
+
+    protected YoyoTier(String name, double weight, double length, int duration, double damage, Tier tier) {
+        this(name,tier,"minecraft");
         this.weight = weight;
         this.length = length;
         this.duration = duration;
         this.damage = damage;
-        this.tier = tier;
     }
 
+
     public static YoyoTier fromJson(JsonObject json, YoyoTier oldTier) {
-        String name = oldTier.getName();
-        Tier tier = oldTier.getTier();
 
         double weight = json.has("weight") ? json.get("weight").getAsDouble() : oldTier.getWeight();
         double length = json.has("length") ? json.get("length").getAsDouble() : oldTier.getLength();
         int duration = JsonHelper.getIntOrDefault(json, "duration",oldTier.getDuration());
         double damage = json.has("damage") ? json.get("damage").getAsDouble() : oldTier.getDamage();
 
-        return new YoyoTier(name, weight, length, duration, damage, tier);
+        return new YoyoTier(oldTier.getName(), oldTier.getTier(), oldTier.plugin)
+                .setWeight(weight)
+                .setLength(length)
+                .setDuration(duration)
+                .setDamage(damage)
+                .setMod(oldTier.getMod())
+                .setCustomConstructor(oldTier.getCustomConstructor())
+                .setCustomCord(oldTier.getCustomCord())
+                .setCustomItem(oldTier.getCustomItem())
+                .addBlockInteraction(oldTier.getBlockInteractions().toArray(new BlockInteraction[]{}))
+                .addEntityInteraction(oldTier.getEntityInteractions().toArray(new EntityInteraction[]{}));
     }
 
     public JsonObject toJson() {
@@ -68,29 +99,93 @@ public class YoyoTier {
         return tier;
     }
 
+    public List<BlockInteraction> getBlockInteractions() {
+        return blockInteractions;
+    }
+
+    public List<EntityInteraction> getEntityInteractions() {
+        return entityInteractions;
+    }
+
+    public @Nullable Constructor<? extends YoyoItem> getCustomConstructor() {
+        if (Yoyos.getPluginHelper() == null) return null;
+        return customConstructor;
+    }
+
+    public boolean hasCustomItem(){
+        return !customItem.isEmpty();
+    }
+    public boolean hasCustomCord(){
+        return !customCord.isEmpty();
+    }
+    public boolean hasCustomMod(){
+        return !mod.isEmpty();
+    }
+
+    public String getCustomItem() {
+        return customItem;
+    }
+
+    public String getCustomCord() {
+        return customCord;
+    }
+
+    public String getMod() {
+        return mod;
+    }
+
+    public String getPlugin() {
+        return plugin;
+    }
+
     // Setters
-    public void setName(String name) {
-        this.name = name;
-    }
 
-    public void setWeight(double weight) {
+    public YoyoTier setWeight(double weight) {
         this.weight = weight;
+        return this;
     }
 
-    public void setLength(double length) {
+    public YoyoTier setLength(double length) {
         this.length = length;
+        return this;
     }
 
-    public void setDuration(int duration) {
+    public YoyoTier setDuration(int duration) {
         this.duration = duration;
+        return this;
     }
 
-    public void setDamage(double damage) {
+    public YoyoTier setDamage(double damage) {
         this.damage = damage;
+        return this;
     }
 
-    public void setTier(Tier tier) {
-        this.tier = tier;
+    public YoyoTier addBlockInteraction(BlockInteraction... interactions){
+        blockInteractions.addAll(List.of(interactions));
+        return this;
+    }
+    public YoyoTier addEntityInteraction(EntityInteraction... interactions){
+        entityInteractions.addAll(List.of(interactions));
+        return this;
+    }
+
+    public YoyoTier setCustomConstructor(Constructor<? extends YoyoItem> constructor){
+        if (constructor == null) return this;
+        this.customConstructor = constructor;
+        return this;
+    }
+
+    public YoyoTier setCustomItem(String customItem){
+        this.customItem = customItem;
+        return this;
+    }
+    public YoyoTier setCustomCord(String customCord){
+        this.customCord = customCord;
+        return this;
+    }
+    public YoyoTier setMod(String mod){
+        this.mod = mod;
+        return this;
     }
 
     @Override

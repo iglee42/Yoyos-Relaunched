@@ -1,15 +1,12 @@
-package fr.iglee42.yoyos.common.init;
+package fr.iglee42.yoyos.common;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import fr.iglee42.yoyos.Config;
-import fr.iglee42.yoyos.common.YoyoTier;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.Tiers;
-import net.minecraftforge.common.ForgeConfigSpec;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -68,7 +65,7 @@ public class YoyosTiers {
 
     }
 
-    public static YoyoTier createTier(String name, double weight, double length, int duration, double damage, Tier tier){
+    private static YoyoTier createTier(String name, double weight, double length, int duration, double damage, Tier tier){
         return new YoyoTier(name,weight,length,duration,damage,tier);
     }
 }

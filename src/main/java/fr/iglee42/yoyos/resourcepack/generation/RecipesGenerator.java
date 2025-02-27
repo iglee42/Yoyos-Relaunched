@@ -9,8 +9,11 @@ import java.io.FileWriter;
 
 public class RecipesGenerator {
     public static void generate() {
-        YoyoPluginHelper.YOYO_TIERS.forEach(t->{
-            yoyo(t.getName().toLowerCase(),YoyoPluginHelper.CUSTOM_CORD.containsKey(t.getName().toLowerCase()) ? YoyoPluginHelper.CUSTOM_CORD.get(t.getName().toLowerCase()) + "_" : "",YoyoPluginHelper.CUSTOM_ITEM.getOrDefault(t.getName().toLowerCase(),""),YoyoPluginHelper.YOYO_BY_MODS.get(t.getName().toLowerCase()));
+        Yoyos.getPluginHelper().YOYO_TIERS.forEach(t->{
+            yoyo(t.getName().toLowerCase(),
+                    t.hasCustomCord() ? t.getCustomCord() + "_" : "",
+                    t.getCustomItem(),
+                    t.hasCustomMod() ? t.getMod() : t.getPlugin());
         });
     }
 
