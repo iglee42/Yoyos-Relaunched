@@ -1,14 +1,14 @@
 package fr.iglee42.yoyos.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import fr.iglee42.yoyos.common.YoyoEntity;
+import fr.iglee42.yoyos.common.api.IYoyo;
 import fr.iglee42.yoyos.common.api.RenderOrientation;
 import fr.iglee42.yoyos.common.init.YoyosItems;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -17,17 +17,16 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 import java.util.Random;
+import java.util.UUID;
 
 public class YoyoRenderer extends EntityRenderer<YoyoEntity> {
 
@@ -71,7 +70,7 @@ public class YoyoRenderer extends EntityRenderer<YoyoEntity> {
 
         }
 
-        itemRenderer.renderStatic(entity.getYoyoStack(), ItemDisplayContext.NONE,0,0,stack,p_114489_,Minecraft.getInstance().level,p_114490_);
+        itemRenderer.renderStatic(entity.getYoyoStack(), ItemDisplayContext.NONE,p_114490_,0,stack,p_114489_,Minecraft.getInstance().level,p_114490_);
         stack.popPose();
 
         if (entity.isCollecting() && !entity.getCollectedDrops().isEmpty()) {
@@ -80,7 +79,7 @@ public class YoyoRenderer extends EntityRenderer<YoyoEntity> {
 
         stack.popPose();
 
-        renderChord(entity,entity.getX(),entity.getY(),entity.getZ(),pt);
+        renderChord(entity,pt,stack,p_114489_,p_114490_);
 
 
         Minecraft.getInstance().getProfiler().pop();
@@ -89,126 +88,108 @@ public class YoyoRenderer extends EntityRenderer<YoyoEntity> {
 
 
 
-    public void renderChord(YoyoEntity entity, double x, double y, double z, float partialTicks) {
-        if (!entity.hasThrower()) return;
-        Player thrower = (Player) entity.getThrower();
-        if (thrower == null) return;
+    public void renderChord(YoyoEntity entity, float partialTicks,PoseStack stack,MultiBufferSource source,int packedLight) {
 
-        y -= (1.6 - thrower.getBbHeight()) * 0.5;
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.getBuilder();
-
-        boolean rightHand = thrower.getMainArm() == HumanoidArm.RIGHT && entity.getHand() == InteractionHand.MAIN_HAND;
-
-        Vec3 handPos;
-
-        if (Minecraft.getInstance().options.getCameraType().ordinal() != 0 || thrower.getId() != Minecraft.getInstance().player.getId()) {
-            double posX = interpolateValue(thrower.xo, thrower.getX(), partialTicks);
-            double posY = interpolateValue(thrower.yo, thrower.getY(), partialTicks) + 1.272;
-            double posZ = interpolateValue(thrower.zo, thrower.getZ(), partialTicks);
-            double bodyRotation = interpolateValue(thrower.yRotO, thrower.getYRot(), partialTicks);
-
-            bodyRotation = Math.toRadians(bodyRotation);
-
-            double rotation = bodyRotation;
-            if (rightHand) rotation += Math.PI;
-
-            double shoulderRadius = 0.347;
-            posX += Math.cos(rotation) * shoulderRadius;
-            posZ += Math.sin(rotation) * shoulderRadius;
-
-            double f = 1.0;
-
-            if (thrower.getPose() == Pose.FALL_FLYING) {
-                f = thrower.getDeltaMovement().lengthSqr() / 0.2f;
-                f = f * f * f;
+        UUID uuid = YoyoEntity.CASTERS.keySet().stream().filter(k->YoyoEntity.CASTERS.get(k).equals(entity)).findFirst().orElse(null);
+        if (uuid == null) return;
+        Player player = Minecraft.getInstance().level.getPlayerByUUID(uuid);
+        if (player != null) {
+            stack.pushPose();
+            int armDirection = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
+            if (player.getOffhandItem().equals(entity.getYoyoStack(),false)){
+                armDirection = -armDirection;
+            }
+            float attackAnimation = player.getAttackAnim(partialTicks);
+            float interpolatedAttackSwing = Mth.sin(Mth.sqrt(attackAnimation ) * (float)Math.PI);
+            float bodyYawRadians = Mth.lerp(partialTicks, player.yBodyRotO, player.yBodyRot) * ((float)Math.PI / 180F);
+            double bodyYawSin = Mth.sin(bodyYawRadians );
+            double bodyYawCos = Mth.cos(bodyYawRadians );
+            double offsetX = (double)armDirection * 0.35D;
+            double hookX,hookY,hookZ;
+            float crouchOffset;
+            if (this.entityRenderDispatcher.options.getCameraType().isFirstPerson() && player == Minecraft.getInstance().player) {
+                double fovFactor = 960.0D / (double)this.entityRenderDispatcher.options.fov().get().intValue();
+                Vec3 cameraOffset = this.entityRenderDispatcher.camera.getNearPlane().getPointOnPlane((float)armDirection * 0.525F, -0.1F);
+                cameraOffset = cameraOffset.scale(fovFactor);
+                cameraOffset = cameraOffset.yRot(interpolatedAttackSwing  * 0.5F);
+                cameraOffset = cameraOffset.xRot(-interpolatedAttackSwing  * 0.7F);
+                hookX = Mth.lerp(partialTicks, player.xo, player.getX()) + cameraOffset.x;
+                hookY = Mth.lerp(partialTicks, player.yo, player.getY()) + cameraOffset.y;
+                hookZ = Mth.lerp(partialTicks, player.zo, player.getZ()) + cameraOffset.z;
+                crouchOffset = player.getEyeHeight();
+            } else {
+                hookX = Mth.lerp(partialTicks, player.xo, player.getX()) - bodyYawCos * offsetX - bodyYawSin  * 0.8D;
+                hookY = player.yo + (double)player.getEyeHeight() + (player.getY() - player.yo) * (double)partialTicks - 0.45D;
+                hookZ = Mth.lerp(partialTicks, player.zo, player.getZ()) - bodyYawSin  * offsetX + bodyYawCos * 0.8D;
+                crouchOffset = player.isCrouching() ? -0.1875F : 0.0F;
             }
 
-            if (f < 1.0) f = 1.0;
+            double entityX = Mth.lerp(partialTicks, entity.xo, entity.getX());
+            double entityY = Mth.lerp(partialTicks, entity.yo, entity.getY()) + 0.25D;
+            double entityZ = Mth.lerp(partialTicks, entity.zo, entity.getZ());
+            float deltaX = (float)(hookX - entityX);
+            float deltaY = (float)(hookY - entityY) + crouchOffset;
+            float deltaZ = (float)(hookZ - entityZ);
+            VertexConsumer lineBuffer = source.getBuffer(RenderType.lineStrip());
+            PoseStack.Pose poseStack = stack.last();
+            int segments = 24;
 
-            float limbSwing = (float) thrower.swingTime;
-            float limbSwingAmount = thrower.getSwimAmount(partialTicks);
-
-            double pitch = Math.cos(limbSwing * 0.6662 + (rightHand ? 0.0 : Math.PI)) * 2.0 * limbSwingAmount * 0.5 / f;
-            pitch *= 0.5 - Math.PI / 10.0;
-
-            if (thrower.isCrouching()) {
-                pitch += 0.4;
-                posY -= 0.4;
+            int color = 0xDDDDDD;
+            if (entity.getYoyoStack().getItem() instanceof IYoyo yoyo) {
+                color = yoyo.getCordColor(entity.getYoyoStack(), entity.tickCount + partialTicks);
             }
 
-            pitch += (rightHand ? -1.0 : 1.0) * Math.sin((thrower.tickCount + partialTicks) * 0.067) * 0.05;
 
-            double roll = Math.PI;
-            double yaw = bodyRotation + Math.cos((thrower.tickCount + partialTicks) * 0.09) * 0.05 + 0.05;
 
-            posX += -1.0 * Math.sin(roll) * Math.cos(yaw) - Math.cos(roll) * Math.sin(pitch) * Math.sin(yaw);
-            posY += Math.cos(pitch) * Math.cos(roll);
-            posZ += Math.sin(roll) * Math.sin(yaw) - Math.cos(roll) * Math.sin(pitch) * Math.cos(yaw);
+            for(int segment = 0; segment <= segments; ++segment) {
+                stringVertex(deltaX, deltaY, deltaZ, lineBuffer, poseStack, fraction(segment, 24), fraction(segment + 1, 24),segment,color);
+            }
 
-            handPos = new Vec3(posX, posY, posZ);
-        } else {
-            double posX = interpolateValue(thrower.xo, thrower.getX(), partialTicks);
-            double posY = interpolateValue(thrower.yo, thrower.getY(), partialTicks) + 1.1;
-            double posZ = interpolateValue(thrower.zo, thrower.getZ(), partialTicks);
-
-            double rotationYaw = Math.toRadians(interpolateValue(thrower.yRotO, thrower.getYRot(), partialTicks));
-            double rotationPitch = Math.toRadians(interpolateValue(thrower.xRotO, thrower.getXRot(), partialTicks));
-
-            double mirror = rightHand ? -1 : 1;
-            double radius = 0.1;
-
-            double v = -Math.sin(rotationPitch) * mirror * mirror * radius;
-            double angle = rotationYaw + Math.PI * 0.5;
-            posX += Math.cos(rotationYaw) * mirror * radius + Math.cos(angle) * v;
-            posY += Math.sin(-rotationPitch) * radius;
-            posZ += Math.sin(rotationYaw) * mirror * radius + Math.sin(angle) * v;
-
-            handPos = new Vec3(posX, posY, posZ);
+            stack.popPose();
         }
 
-        double yoyoPosX = interpolateValue(entity.xo, entity.getX(), partialTicks);
-        double yoyoPosY = interpolateValue(entity.yo, entity.getY(), partialTicks) - entity.getBbHeight();
-        double yoyoPosZ = interpolateValue(entity.zo, entity.getZ(), partialTicks);
+    }
 
-        double xDiff = handPos.x - yoyoPosX;
-        double yDiff = handPos.y - yoyoPosY;
-        double zDiff = handPos.z - yoyoPosZ;
+    private static float fraction(int p_114691_, int p_114692_) {
+        return (float)p_114691_ / (float)p_114692_;
+    }
 
-        int color = 0xDDDDDD;
-        if (entity.hasYoyo()) {
-            color = entity.getYoyo().getCordColor(entity.getYoyoStack(), entity.tickCount + partialTicks);
-        }
+    private static void stringVertex(
+            float deltaX, float deltaY, float deltaZ,
+            VertexConsumer vertexBuffer, PoseStack.Pose pose,
+            float currentSegmentFraction, float nextSegmentFraction, int currentSegment, int color) {
 
-        float stringR = (color >> 16 & 255) / 255f;
+        float currentX = deltaX * currentSegmentFraction;
+        float currentY = deltaY * (currentSegmentFraction * currentSegmentFraction + currentSegmentFraction) * 0.5F + 0.25F;
+        float currentZ = deltaZ * currentSegmentFraction;
+
+        float nextX = deltaX * nextSegmentFraction - currentX;
+        float nextY = deltaY * (nextSegmentFraction * nextSegmentFraction + nextSegmentFraction) * 0.5F + 0.25F - currentY;
+        float nextZ = deltaZ * nextSegmentFraction - currentZ;
+
+        float segmentLength = Mth.sqrt(nextX * nextX + nextY * nextY + nextZ * nextZ);
+        nextX /= segmentLength;
+        nextY /= segmentLength;
+        nextZ /= segmentLength;
+
+        float stringR = (color >> 16& 255) / 255f;
         float stringG = (color >> 8 & 255) / 255f;
         float stringB = (color & 255) / 255f;
 
-        for (int i = 0; i <= 1; i++) {
-            bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-            for (int j = 0; j <= 24; j++) {
-                float r = stringR;
-                float g = stringG;
-                float b = stringB;
+        float r = stringR;
+        float g = stringG;
+        float b = stringB;
 
-                if (j % 2 == 0) {
-                    r *= 0.7f;
-                    g *= 0.7f;
-                    b *= 0.7f;
-                }
-
-                double segment = j / 24.0;
-                double zag = 0.0125 * (i % 2 * 2 - 1);
-                double x1 = x + xDiff * segment;
-                double y1 = y + yDiff * (segment * segment + segment) * 0.5;
-                double z1 = z + zDiff * segment;
-
-                bufferBuilder.vertex(x1 - 0.0125, y1, z1 + zag).color(r, g, b, 1.0f).endVertex();
-                bufferBuilder.vertex(x1 + 0.0125, y1, z1 - zag).color(r, g, b, 1.0f).endVertex();
-            }
-            tessellator.end();
+        if (currentSegment % 2 == 0) {
+            r *= 0.7f;
+            g *= 0.7f;
+            b *= 0.7f;
         }
 
+        vertexBuffer.vertex(pose.pose(), currentX, currentY, currentZ)
+                .color(r, g, b,1)
+                .normal(pose.normal(), nextX, nextY, nextZ)
+                .endVertex();
     }
 
 

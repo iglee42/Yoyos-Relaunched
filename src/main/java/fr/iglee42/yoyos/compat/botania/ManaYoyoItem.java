@@ -40,4 +40,9 @@ public class ManaYoyoItem extends YoyoItem implements CustomDamageItem {
             stack.setDamageValue(stack.getDamageValue() - 1);
         }
     }
+
+    @Override
+    public int getCordColor(ItemStack yoyo, float ticks) {
+        return 0x9DFFF4;
+    }
 }
