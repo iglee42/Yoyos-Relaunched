@@ -39,6 +39,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -94,6 +96,9 @@ public class Interaction {
                     float targetHealth = 0.0f;
                     boolean setEntityOnFire = false;
                     int fireAspect = EnchantmentHelper.getFireAspect(player);
+                    if (ModList.get().isLoaded("twilightforest") && ForgeRegistries.ITEMS.getKey(yoyoStack.getItem()).getPath().equals("fiery_yoyo")){
+                        fireAspect++;
+                    }
 
                     if (target instanceof LivingEntity lv){
                         targetHealth = lv.getHealth();
