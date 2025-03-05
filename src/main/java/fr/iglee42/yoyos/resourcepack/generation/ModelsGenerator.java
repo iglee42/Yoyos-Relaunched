@@ -12,7 +12,8 @@ import static fr.iglee42.yoyos.Yoyos.MODID;
 public class ModelsGenerator {
     public static void generate() {
         Yoyos.getPluginHelper().YOYO_TIERS.forEach((t)->{
-            itemFromParent(t.getName().toLowerCase()+"_yoyo","item/handheld",new TextureKey("layer0","yoyos:item/"+(t.hasCustomMod() ? t.getMod() : t.getPlugin())+"/"+t.getName()));
+            if (t.getCustomModel().isEmpty())itemFromParent(t.getName().toLowerCase()+"_yoyo","item/handheld",new TextureKey("layer0","yoyos:item/"+(t.hasCustomMod() ? t.getMod() : t.getPlugin())+"/"+t.getName()));
+            else generateItem(t.getName().toLowerCase()+ "_yoyo",t.getCustomModel());
         });
     }
 

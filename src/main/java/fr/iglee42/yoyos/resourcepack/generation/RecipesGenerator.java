@@ -10,18 +10,29 @@ import java.io.FileWriter;
 public class RecipesGenerator {
     public static void generate() {
         Yoyos.getPluginHelper().YOYO_TIERS.forEach(t->{
-            yoyo(t.getName().toLowerCase(),
+            if (t.getCustomRecipe().isEmpty())
+                yoyo(t.getName().toLowerCase(),
                     t.hasCustomCord() ? t.getCustomCord() + "_" : "",
                     t.getCustomItem(),
-                    t.hasCustomMod() ? t.getMod() : t.getPlugin());
+                    t.hasCustomMod() ? t.getMod() : t.getPlugin(),
+                    t.hasCustomStick() ? t.getCustomStick() : "minecraft:stick");
+            else{
+                try {
+                    FileWriter writer = new FileWriter(new File(PathConstant.RECIPES_PATH.toFile(), t.getName().toLowerCase()+"_yoyo.json"));
+                    writer.write(t.getCustomRecipe());
+                    writer.close();
+                } catch (Exception exception){
+                    Yoyos.LOGGER.error("An error was detected when recipes generating",exception);
+                }
+            }
         });
     }
 
 
 
-    private static void yoyo(String name,String cord,String item,String mod){
+    private static void yoyo(String name,String cord,String item,String mod,String stick){
         try {
-            FileWriter writer = new FileWriter(new File(PathConstant.RECIPES_PATH.toFile(), name+".json"));
+            FileWriter writer = new FileWriter(new File(PathConstant.RECIPES_PATH.toFile(), name+"_yoyo.json"));
             writer.write("{\n" +
                     "  \"type\": \"minecraft:crafting_shaped\",\n" +
                     "  \"category\": \"equipment\",\n" +
@@ -33,7 +44,7 @@ public class RecipesGenerator {
                     "      \"item\": \""+mod+":"+(item.isEmpty() ? name +"_ingot" : item)+"\"\n" +
                     "    },\n" +
                     "    \"S\": {\n" +
-                    "      \"item\": \"minecraft:stick\"\n" +
+                    "      \"item\": \""+stick+"\"\n" +
                     "    }\n" +
                     "  },\n" +
                     "  \"pattern\": [\n" +

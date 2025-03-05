@@ -2,6 +2,7 @@ package fr.iglee42.yoyos.compat;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.RegisterEvent;
 
 import java.util.HashMap;
@@ -22,4 +23,5 @@ public interface IYoyoPlugin {
     default Map<ResourceLocation, List<String>> addTags() { return new HashMap<>();};
     default void init(YoyoPluginHelper helper){}
 
+    default void clientSetup(FMLClientSetupEvent event){};
 }

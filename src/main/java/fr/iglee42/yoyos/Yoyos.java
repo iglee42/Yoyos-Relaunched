@@ -139,6 +139,7 @@ public class Yoyos {
 
     private void clientSetup(final FMLClientSetupEvent event) {
         EntityRenderers.register(YoyosEntities.YOYO.get(), YoyoRenderer::new);
+        pluginHelper.plugins.forEach(p->p.clientSetup(event));
     }
 
     private void registerEvent(RegisterEvent event){

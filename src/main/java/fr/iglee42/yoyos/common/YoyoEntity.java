@@ -4,6 +4,8 @@ import com.mojang.datafixers.util.Pair;
 import fr.iglee42.yoyos.common.api.IYoyo;
 import fr.iglee42.yoyos.common.init.YoyosEnchantments;
 import fr.iglee42.yoyos.common.init.YoyosEntities;
+import fr.iglee42.yoyos.compat.pneumaticcraft.PressurizedYoyoItem;
+import fr.iglee42.yoyos.compat.redstonearsenal.FluxYoyoItem;
 import fr.iglee42.yoyos.network.CollectedDropsSyncS2C;
 import fr.iglee42.yoyos.network.YoyosNetwork;
 import net.minecraft.core.BlockPos;
@@ -32,6 +34,7 @@ import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Team;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -316,6 +319,12 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
             setYoyo(checkAndGetYoyo());
 
             if (getMaxTime() >= 0 && decrementRemainingTime() < 0) forceRetract();
+            if (ModList.get().isLoaded("pneumaticcraft"))
+                if (getYoyoStack().getItem() instanceof PressurizedYoyoItem it)
+                    if (it.getPressure(getYoyoStack()) < 0.1) forceRetract();
+            if (ModList.get().isLoaded("redstone_arsenal"))
+                if (getYoyoStack().getItem() instanceof FluxYoyoItem it)
+                    if (!it.hasEnergy(getYoyoStack(),false)) forceRetract();
 
             updateMotion();
             moveAndCollide();

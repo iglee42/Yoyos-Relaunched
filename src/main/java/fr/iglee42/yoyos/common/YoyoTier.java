@@ -28,7 +28,10 @@ public class YoyoTier {
     private Constructor<? extends YoyoItem> customConstructor = null;
     private String customItem = "";
     private String customCord = "";
+    private String customStick = "";
     private String mod = "";
+    private String customRecipe = "";
+    private String customModel = "";
 
     public YoyoTier(String name,Tier tier,String plugin){
         this.name = name;
@@ -61,8 +64,11 @@ public class YoyoTier {
                 .setCustomConstructor(oldTier.getCustomConstructor())
                 .setCustomCord(oldTier.getCustomCord())
                 .setCustomItem(oldTier.getCustomItem())
+                .setCustomStick(oldTier.getCustomStick())
                 .addBlockInteraction(oldTier.getBlockInteractions().toArray(new BlockInteraction[]{}))
-                .addEntityInteraction(oldTier.getEntityInteractions().toArray(new EntityInteraction[]{}));
+                .addEntityInteraction(oldTier.getEntityInteractions().toArray(new EntityInteraction[]{}))
+                .setCustomRecipe(oldTier.getCustomRecipe())
+                .setCustomModel(oldTier.getCustomModel());
     }
 
     public JsonObject toJson() {
@@ -118,6 +124,9 @@ public class YoyoTier {
     public boolean hasCustomCord(){
         return !customCord.isEmpty();
     }
+    public boolean hasCustomStick(){
+        return !customStick.isEmpty();
+    }
     public boolean hasCustomMod(){
         return !mod.isEmpty();
     }
@@ -130,12 +139,23 @@ public class YoyoTier {
         return customCord;
     }
 
+    public String getCustomStick() {
+        return customStick;
+    }
+
     public String getMod() {
         return mod;
     }
 
     public String getPlugin() {
         return plugin;
+    }
+
+    public String getCustomRecipe() {
+        return customRecipe;
+    }
+    public String getCustomModel() {
+        return customModel;
     }
 
     // Setters
@@ -183,8 +203,22 @@ public class YoyoTier {
         this.customCord = customCord;
         return this;
     }
+    public YoyoTier setCustomStick(String customStick){
+        this.customStick = customStick;
+        return this;
+    }
     public YoyoTier setMod(String mod){
         this.mod = mod;
+        return this;
+    }
+
+    public YoyoTier setCustomRecipe(String customRecipe){
+        this.customRecipe = customRecipe;
+        return this;
+    }
+
+    public YoyoTier setCustomModel(String customModel){
+        this.customModel = customModel;
         return this;
     }
 
