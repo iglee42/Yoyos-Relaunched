@@ -3,10 +3,7 @@ package fr.iglee42.yoyos;
 import com.mojang.logging.LogUtils;
 import fr.iglee42.yoyos.client.YoyoRenderer;
 import fr.iglee42.yoyos.client.YoyosKeybindings;
-import fr.iglee42.yoyos.common.init.YoyosEnchantments;
-import fr.iglee42.yoyos.common.init.YoyosEntities;
-import fr.iglee42.yoyos.common.init.YoyosItems;
-import fr.iglee42.yoyos.common.init.YoyosSounds;
+import fr.iglee42.yoyos.common.init.*;
 import fr.iglee42.yoyos.compat.IYoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPluginHelper;
@@ -16,20 +13,21 @@ import fr.iglee42.yoyos.resourcepack.PathConstant;
 import fr.iglee42.yoyos.resourcepack.YoyosPackFinder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.forgespi.language.ModFileScanData;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
+
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
+import net.neoforged.neoforgespi.language.ModFileScanData;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Type;
 import org.slf4j.Logger;
@@ -44,8 +42,7 @@ public class Yoyos {
     public static final Logger LOGGER = LogUtils.getLogger();
     protected static YoyoPluginHelper pluginHelper;
 
-    public Yoyos() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public Yoyos(IEventBus modEventBus) {
 
 
         try {
@@ -58,7 +55,7 @@ public class Yoyos {
 
         modEventBus.addListener(YoyosItems::registerItem);
         YoyosItems.TABS.register(modEventBus);
-        YoyosEnchantments.ENCHANTMENTS.register(modEventBus);
+        YoyosDataComponents.DATA_COMPONENTS.register(modEventBus);
         YoyosEntities.ENTITY_TYPES.register(modEventBus);
         YoyosSounds.SOUNDS.register(modEventBus);
 
@@ -66,14 +63,15 @@ public class Yoyos {
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerEvent);
+        modEventBus.addListener(this::registerPackFinder);
 
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(this::clientSetup);
-            MinecraftForge.EVENT_BUS.addListener(YoyosKeybindings::handleEventInput);
+            NeoForge.EVENT_BUS.addListener(YoyosKeybindings::handleEventInput);
         }
 
-        MinecraftForge.EVENT_BUS.register(this);
+        //NeoForge.EVENT_BUS.register(this);
         modEventBus.addListener(this::addCreative);
 
         try {
@@ -134,7 +132,6 @@ public class Yoyos {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        YoyosNetwork.init();
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
@@ -150,12 +147,17 @@ public class Yoyos {
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() != YoyosItems.TAB.getKey()) return;
-        ForgeRegistries.ITEMS.getKeys().stream().filter(rs->rs.getNamespace().equals(MODID)).forEach(rs->{
-            event.accept(ForgeRegistries.ITEMS.getDelegateOrThrow(rs));
+        BuiltInRegistries.ITEM.keySet().stream().filter(rs->rs.getNamespace().equals(MODID) && BuiltInRegistries.ITEM.get(rs) != null).forEach(rs->{
+            event.accept(BuiltInRegistries.ITEM.get(rs));
         });
     }
 
     public static YoyoPluginHelper getPluginHelper() {
         return pluginHelper;
+    }
+
+    private void registerPackFinder(AddPackFindersEvent event){
+        if (event.getPackType().equals(net.minecraft.server.packs.PackType.CLIENT_RESOURCES)) event.addRepositorySource(new YoyosPackFinder(PackType.RESOURCE));
+        else event.addRepositorySource(new YoyosPackFinder(PackType.DATA));
     }
 }

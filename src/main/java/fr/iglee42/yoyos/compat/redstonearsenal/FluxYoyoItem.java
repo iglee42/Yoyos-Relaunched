@@ -1,30 +1,9 @@
 package fr.iglee42.yoyos.compat.redstonearsenal;
 
-import cofh.core.util.ProxyUtils;
-import cofh.lib.api.item.ICoFHItem;
-import cofh.redstonearsenal.common.item.IFluxItem;
-import fr.iglee42.yoyos.common.YoyoEntity;
 import fr.iglee42.yoyos.common.YoyoItem;
 import fr.iglee42.yoyos.common.YoyoTier;
-import fr.iglee42.yoyos.common.init.YoyosSounds;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.energy.IEnergyStorage;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.function.Consumer;
-
-public class FluxYoyoItem extends YoyoItem implements IFluxItem {
+public class FluxYoyoItem extends YoyoItem/* implements IFluxItem*/ {
 
 
     protected final int maxEnergy = 800000;
@@ -33,10 +12,10 @@ public class FluxYoyoItem extends YoyoItem implements IFluxItem {
 
     public FluxYoyoItem(YoyoTier tier) {
         super(tier);
-        ProxyUtils.registerItemModelProperty(this,new ResourceLocation("charged"),this::getChargedModelProperty);
+        //ProxyUtils.registerItemModelProperty(this,new ResourceLocation("charged"),this::getChargedModelProperty);
     }
 
-    @Override
+    /*@Override
     public Capability<? extends IEnergyStorage> getEnergyCapability() {
         return IFluxItem.super.getEnergyCapability();
     }
@@ -127,5 +106,5 @@ public class FluxYoyoItem extends YoyoItem implements IFluxItem {
     public void appendHoverText(ItemStack stack, @Nullable Level p_41422_, List<Component> tooltips, TooltipFlag p_41424_) {
         tooltipDelegate(stack, p_41422_, tooltips, p_41424_);
         super.appendHoverText(stack, p_41422_, tooltips, p_41424_);
-    }
+    }*/
 }

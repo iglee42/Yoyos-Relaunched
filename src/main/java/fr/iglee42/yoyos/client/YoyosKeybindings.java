@@ -6,17 +6,17 @@ import fr.iglee42.yoyos.common.YoyoEntity;
 import fr.iglee42.yoyos.common.YoyoItem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD,modid = Yoyos.MODID)
+@EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD,modid = Yoyos.MODID)
 public class YoyosKeybindings {
 
     private static List<KeyMapping> keyMappings = new ArrayList<>();
@@ -41,8 +41,7 @@ public class YoyosKeybindings {
         return String.join(".", "key", Yoyos.MODID, name);
     }
 
-    public static void handleEventInput(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
+    public static void handleEventInput(ClientTickEvent.Pre event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null)
             return;

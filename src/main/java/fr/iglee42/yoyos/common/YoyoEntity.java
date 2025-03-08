@@ -6,18 +6,23 @@ import fr.iglee42.yoyos.common.init.YoyosEnchantments;
 import fr.iglee42.yoyos.common.init.YoyosEntities;
 import fr.iglee42.yoyos.compat.pneumaticcraft.PressurizedYoyoItem;
 import fr.iglee42.yoyos.compat.redstonearsenal.FluxYoyoItem;
-import fr.iglee42.yoyos.network.CollectedDropsSyncS2C;
 import fr.iglee42.yoyos.network.YoyosNetwork;
+import fr.iglee42.yoyos.network.payloads.CollectedDropsS2CPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -32,13 +37,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.scores.Team;
-import net.minecraftforge.entity.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.scores.PlayerTeam;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,7 @@ import java.util.*;
 
 import static java.lang.Math.*;
 
-public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
+public class YoyoEntity extends Entity{
 
     public static final EntityDataAccessor<ItemStack> YOYO_STACK = SynchedEntityData.defineId(YoyoEntity.class,EntityDataSerializers.ITEM_STACK);
     public static final EntityDataAccessor<Byte> HAND = SynchedEntityData.defineId(YoyoEntity.class,EntityDataSerializers.BYTE);
@@ -117,19 +118,21 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
             setPos(player.getX(),player.getY() + getThrowerEyeHeight(), player.getZ());
     }
 
+
    //ENTITY METHODS
 
+
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(YOYO_STACK, ItemStack.EMPTY);
-        this.entityData.define(HAND, (byte)InteractionHand.MAIN_HAND.ordinal());
-        this.entityData.define(RETRACTING, false);
-        this.entityData.define(MAX_TIME, -1);
-        this.entityData.define(REMAINING_TIME, -1);
-        this.entityData.define(WEIGHT, 1.0f);
-        this.entityData.define(CURRENT_LENGTH, 1.0f);
-        this.entityData.define(MAX_LENGTH, 1.0f);
-        this.entityData.define(MAX_COLLECTED_DROPS, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(YOYO_STACK, ItemStack.EMPTY);
+        builder.define(HAND, (byte)InteractionHand.MAIN_HAND.ordinal());
+        builder.define(RETRACTING, false);
+        builder.define(MAX_TIME, -1);
+        builder.define(REMAINING_TIME, -1);
+        builder.define(WEIGHT, 1.0f);
+        builder.define(CURRENT_LENGTH, 1.0f);
+        builder.define(MAX_LENGTH, 1.0f);
+        builder.define(MAX_COLLECTED_DROPS, 0);
     }
 
     @Override
@@ -139,7 +142,7 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
         for (int i = 0; i < list.size(); i++) {
             CompoundTag nbt = list.getCompound(i);
             nbt.putByte("Count", (byte) 1);
-            ItemStack stack = ItemStack.of(nbt);
+            ItemStack stack = ItemStack.parseOptional(level().registryAccess(),nbt);
             stack.setCount(nbt.getByte("count"));
             collectedDrops.add(stack);
         }
@@ -150,35 +153,20 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
         ListTag list = new ListTag();
         collectedDrops.forEach(it->{
             CompoundTag stackTag = new CompoundTag();
-            ResourceLocation id = ForgeRegistries.ITEMS.getKey(it.getItem());
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(it.getItem());
             stackTag.putString("id",id.toString());
             stackTag.putInt("count",it.getCount());
-            if (it.hasTag()){
-                stackTag.put("tag",it.getTag());
-            }
+            stackTag.put("components", DataComponentPatch.CODEC.encode(it.getComponentsPatch(),level().registryAccess().createSerializationContext(NbtOps.INSTANCE),new CompoundTag()).getOrThrow());
             list.add(stackTag);
         });
         tag.put("collectedDrops",list);
     }
 
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
 
     @Override
-    public void writeSpawnData(FriendlyByteBuf buffer) {
-        buffer.writeInt(thrower.getId());
+    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity p_352110_) {
+        return  new ClientboundAddEntityPacket(this, p_352110_);
     }
-
-    @Override
-    public void readSpawnData(FriendlyByteBuf buffer) {
-        Player player = (Player) level().getEntity(buffer.readInt());
-        thrower = player;
-
-        CASTERS.put(player.getUUID(),this);
-    }
-
 
     /**
      * @return the amount of stack left uncollected
@@ -322,9 +310,9 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
             if (ModList.get().isLoaded("pneumaticcraft"))
                 if (getYoyoStack().getItem() instanceof PressurizedYoyoItem it)
                     if (it.getPressure(getYoyoStack()) < 0.1) forceRetract();
-            if (ModList.get().isLoaded("redstone_arsenal"))
+            /*if (ModList.get().isLoaded("redstone_arsenal"))
                 if (getYoyoStack().getItem() instanceof FluxYoyoItem it)
-                    if (!it.hasEnergy(getYoyoStack(),false)) forceRetract();
+                    if (!it.hasEnergy(getYoyoStack(),false)) forceRetract();*/
 
             updateMotion();
             moveAndCollide();
@@ -368,12 +356,11 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
                 ItemStack collectedDrop = iterator.next();
 
                 if (!collectedDrop.isEmpty()) {
-                    if (collectedDrop.hasTag()) continue ;
                     Item item = collectedDrop.getItem();
 
                     ItemStack master = existing.get(item);
 
-                    if (master != null && collectedDrop.equals(master,false)) {
+                    if (collectedDrop.equals(master)) {
                         master.setCount(master.getCount() + collectedDrop.getCount());
                         iterator.remove();
                     } else {
@@ -382,7 +369,7 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
                 }
             }
 
-            if (!level().isClientSide)YoyosNetwork.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(()->level().getChunkAt(blockPosition())), new CollectedDropsSyncS2C(this));
+            if (!level().isClientSide) PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level(),level().getChunkAt(blockPosition()).getPos(), new CollectedDropsS2CPayload(this));
 
             needCollectedSync = false;
         }
@@ -492,7 +479,7 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
 
 
     protected void updateMotion(){
-        Vec3 motion = getTarget().subtract(getX(),getY() + getDimensions(getPose()).height / 2, getZ()).scale(0.15 + 0.85 * pow(1.1,-((10-getWeight()) * (10-getWeight()))));
+        Vec3 motion = getTarget().subtract(getX(),getY() + getDimensions(getPose()).height() / 2, getZ()).scale(0.15 + 0.85 * pow(1.1,-((10-getWeight()) * (10-getWeight()))));
 
         if (isInWater()){
             motion = motion.scale(yoyo.getWaterMovementModifier(getYoyoStack()));
@@ -679,7 +666,7 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
         IYoyo yoyo = (IYoyo) stack.getItem();
 
         if (!level().isClientSide && shouldGetStats) {
-            setMaxCollectedDrops(yoyo.getMaxCollectedDrops(stack));
+            setMaxCollectedDrops(yoyo.getMaxCollectedDrops(stack,level().registryAccess()));
             attackInterval = yoyo.getAttackInterval(stack);
             int duration = yoyo.getDuration(stack);
             setMaxTime(duration);
@@ -719,7 +706,7 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
                     if (it != null && !it.isEmpty()){
                         while (it.getCount() > 0){
                             ItemStack stack = it.split(it.getMaxStackSize());
-                            ItemEntity item = new ItemEntity(level(),getX(),getY() + getDimensions(Pose.STANDING).height,getZ(),stack);
+                            ItemEntity item = new ItemEntity(level(),getX(),getY() + getDimensions(Pose.STANDING).height(),getZ(),stack);
                             item.setDefaultPickUpDelay();
                             item.setDeltaMovement(Vec3.ZERO);
 
@@ -733,7 +720,7 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
     }
 
     @Override
-    public @Nullable Team getTeam() {
+    public PlayerTeam getTeam() {
         return hasThrower() ? getThrower().getTeam() : super.getTeam();
     }
 
@@ -869,11 +856,11 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
     }
 
     public boolean isCollecting(){
-        return YoyoItem.isEnchantmentEnable(getYoyoStack(), YoyosEnchantments.COLLECTING) && getMaxCollectedDrops() > 0;
+        return YoyoItem.isEnchantmentEnable(getYoyoStack(), YoyosEnchantments.COLLECTING,registryAccess()) && getMaxCollectedDrops() > 0;
     }
 
     public float getThrowerEyeHeight(){
-        return thrower.getStandingEyeHeight(thrower.getPose(),thrower.getDimensions(thrower.getPose()));
+        return thrower.getEyeHeight(thrower.getPose());
     }
 
 }

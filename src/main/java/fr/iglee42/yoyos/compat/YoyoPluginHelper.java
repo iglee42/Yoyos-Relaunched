@@ -11,7 +11,7 @@ import fr.iglee42.yoyos.common.api.BlockInteraction;
 import fr.iglee42.yoyos.common.api.EntityInteraction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -56,7 +56,7 @@ public class YoyoPluginHelper {
 
     public void registerItems(RegisterEvent event) {
         YOYO_TIERS.forEach(t -> {
-            event.register(Registries.ITEM, new ResourceLocation(Yoyos.MODID, t.getName().toLowerCase() + "_yoyo"), () -> {
+            event.register(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(Yoyos.MODID, t.getName().toLowerCase() + "_yoyo"), () -> {
                 if (t.getCustomConstructor() != null){
                     try {
                         return t.getCustomConstructor().newInstance(t).addEntityInteraction(t.getEntityInteractions().toArray(new EntityInteraction[]{})).addBlockInteraction(t.getBlockInteractions().toArray(new BlockInteraction[]{}));

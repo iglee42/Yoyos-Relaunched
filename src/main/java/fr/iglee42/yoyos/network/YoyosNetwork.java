@@ -1,29 +1,30 @@
 package fr.iglee42.yoyos.network;
 
-import fr.iglee42.yoyos.Yoyos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import fr.iglee42.yoyos.network.handlers.CollectedDropsSyncHandler;
+import fr.iglee42.yoyos.network.handlers.HandSyncHandler;
+import fr.iglee42.yoyos.network.handlers.ToggleAttackHandler;
+import fr.iglee42.yoyos.network.handlers.ToggleEnchantmentHandler;
+import fr.iglee42.yoyos.network.payloads.CollectedDropsS2CPayload;
+import fr.iglee42.yoyos.network.payloads.HandSyncS2CPayload;
+import fr.iglee42.yoyos.network.payloads.ToggleAttackC2SPayload;
+import fr.iglee42.yoyos.network.payloads.ToggleEnchantmentC2SPayload;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-import java.util.Optional;
+import static fr.iglee42.yoyos.Yoyos.MODID;
 
+@EventBusSubscriber(modid = MODID,bus = EventBusSubscriber.Bus.MOD)
 public class YoyosNetwork {
+    @SubscribeEvent
+    public static void registerNetworking(final RegisterPayloadHandlersEvent event) {
+        final PayloadRegistrar registrar = event.registrar(MODID);
 
-    public static final String PROTOCOL = "1.0";
-    public static SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(new ResourceLocation(Yoyos.MODID,"messages"),
-            ()->PROTOCOL,
-            s->true,
-            s->true);
+        registrar.playToServer(ToggleAttackC2SPayload.TYPE, ToggleAttackC2SPayload.STREAM_CODEC, ToggleAttackHandler.instance()::handle);
+        registrar.playToServer(ToggleEnchantmentC2SPayload.TYPE, ToggleEnchantmentC2SPayload.STREAM_CODEC, ToggleEnchantmentHandler.instance()::handle);
+        registrar.playToClient(CollectedDropsS2CPayload.TYPE, CollectedDropsS2CPayload.STREAM_CODEC, CollectedDropsSyncHandler.instance()::handle);
+        registrar.playToClient(HandSyncS2CPayload.TYPE, HandSyncS2CPayload.STREAM_CODEC, HandSyncHandler.instance()::handle);
 
-    private static int ID = 0;
-    private static int id(){
-        return ID++;
-    }
-
-    public static void init(){
-        CHANNEL.registerMessage(id(), CollectedDropsSyncS2C.class,CollectedDropsSyncS2C::encode,CollectedDropsSyncS2C::new,CollectedDropsSyncS2C::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        CHANNEL.registerMessage(id(), ToggleYoyoEnchantC2S.class,ToggleYoyoEnchantC2S::encode,ToggleYoyoEnchantC2S::new,ToggleYoyoEnchantC2S::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        CHANNEL.registerMessage(id(), ToggleYoyoAttackC2S.class,ToggleYoyoAttackC2S::encode,ToggleYoyoAttackC2S::new,ToggleYoyoAttackC2S::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
     }
 }

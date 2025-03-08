@@ -1,9 +1,9 @@
 package fr.iglee42.yoyos.compat;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
 import java.util.HashMap;
 import java.util.List;

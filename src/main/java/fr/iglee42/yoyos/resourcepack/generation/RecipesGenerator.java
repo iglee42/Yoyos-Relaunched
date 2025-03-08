@@ -53,7 +53,7 @@ public class RecipesGenerator {
                     "    \"CI \"\n" +
                     "  ],\n" +
                     "  \"result\": {\n" +
-                    "    \"item\": \"yoyos:"+name+"_yoyo\"\n" +
+                    "    \"id\": \"yoyos:"+name+"_yoyo\"\n" +
                     "  },\n" +
                     "  \"show_notification\": true\n" +
                     "}");

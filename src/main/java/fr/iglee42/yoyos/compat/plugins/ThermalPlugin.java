@@ -3,7 +3,6 @@ package fr.iglee42.yoyos.compat.plugins;
 import cofh.lib.util.Utils;
 import fr.iglee42.yoyos.common.YoyoItem;
 import fr.iglee42.yoyos.common.YoyoTier;
-import fr.iglee42.yoyos.common.init.YoyosEnchantments;
 import fr.iglee42.yoyos.compat.IYoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPluginHelper;
@@ -13,13 +12,11 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Tiers;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.ModList;
+
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.common.CommonHooks;
 
 import java.util.UUID;
-
-import static cofh.core.init.CoreMobEffects.ENDERFERENCE;
 
 @YoyoPlugin
 public class ThermalPlugin implements IYoyoPlugin {
@@ -78,7 +75,7 @@ public class ThermalPlugin implements IYoyoPlugin {
                 .addEntityInteraction((yoyoStack, player, hand, yoyo, target) -> {
                     if (!yoyo.canAttack() || !target.isAlive()) return false;
                     if (!YoyoItem.isAttackEnable(yoyoStack)) return false;
-                    if (!ForgeHooks.onPlayerAttackTarget(player, target)) return false;
+                    if (!CommonHooks.onPlayerAttackTarget(player, target)) return false;
 
                     UUID entityUUID = target.getUUID();
 
@@ -103,7 +100,7 @@ public class ThermalPlugin implements IYoyoPlugin {
                 .addEntityInteraction((yoyoStack, player, hand, yoyo, target) -> {
                     if (!yoyo.canAttack() || !target.isAlive()) return false;
                     if (!YoyoItem.isAttackEnable(yoyoStack)) return false;
-                    if (!ForgeHooks.onPlayerAttackTarget(player, target)) return false;
+                    if (!CommonHooks.onPlayerAttackTarget(player, target)) return false;
 
                     UUID entityUUID = target.getUUID();
 
@@ -116,7 +113,7 @@ public class ThermalPlugin implements IYoyoPlugin {
                         if (!yoyo.level().getBlockState(randPos).isSolid()) {
                             if (target instanceof LivingEntity) {
                                 if (Utils.teleportEntityTo(target, randPos)) {
-                                    ((LivingEntity) target).addEffect(new MobEffectInstance(ENDERFERENCE.get(), 40, 0, false, false));
+                                   // ((LivingEntity) target).addEffect(new MobEffectInstance(ENDERFERENCE.get(), 40, 0, false, false));
                                 }
                             } else if (target.level().getGameTime() % 40 == 0) {
                                 target.setPos(randPos.getX(), randPos.getY(), randPos.getZ());

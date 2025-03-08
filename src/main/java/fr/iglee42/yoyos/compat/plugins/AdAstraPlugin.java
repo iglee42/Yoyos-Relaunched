@@ -14,8 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tiers;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
 import java.lang.reflect.Constructor;
 
@@ -75,8 +74,8 @@ public class AdAstraPlugin implements IYoyoPlugin {
 
     @Override
     public void registerItems(RegisterEvent event) {
-        event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,"cheese_string"),()-> new Item(new Item.Properties()));
-        event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,"cheese_cord"),()-> new Item(new Item.Properties()));
+        event.register(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(Yoyos.MODID,"cheese_string"),()-> new Item(new Item.Properties()));
+        event.register(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(Yoyos.MODID,"cheese_cord"),()-> new Item(new Item.Properties()));
     }
 
 }

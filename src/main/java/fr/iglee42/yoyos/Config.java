@@ -1,7 +1,7 @@
 package fr.iglee42.yoyos;
 
 import fr.iglee42.yoyos.common.YoyosTiers;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.File;
 import java.io.IOException;

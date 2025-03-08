@@ -5,11 +5,10 @@ import fr.iglee42.yoyos.compat.IYoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPluginHelper;
 import fr.iglee42.yoyos.compat.pneumaticcraft.PressurizedYoyoItem;
-import me.desht.pneumaticcraft.api.lib.Names;
-import me.desht.pneumaticcraft.common.util.PneumaticCraftUtils;
+import me.desht.pneumaticcraft.api.data.PneumaticCraftTags;
+import me.desht.pneumaticcraft.datagen.ModItemTagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Tiers;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,5 +32,12 @@ public class PneumaticCraftPlugin implements IYoyoPlugin {
                     .setCustomItem("ingot_iron_compressed")
                     .setCustomConstructor(PressurizedYoyoItem.class.getConstructor(YoyoTier.class)));
         } catch (NoSuchMethodException ignored) {}
+    }
+
+    @Override
+    public Map<ResourceLocation, List<String>> addTags() {
+        Map<ResourceLocation,List<String>> tags = new HashMap<>();
+        tags.put(PneumaticCraftTags.Items.PNC_TOOLTIP.location(),List.of("yoyos:compressed_iron_yoyo"));
+        return IYoyoPlugin.super.addTags();
     }
 }

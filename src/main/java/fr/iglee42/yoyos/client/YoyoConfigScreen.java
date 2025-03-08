@@ -2,16 +2,18 @@ package fr.iglee42.yoyos.client;
 
 import fr.iglee42.yoyos.common.YoyoItem;
 import fr.iglee42.yoyos.common.init.YoyosEnchantments;
-import fr.iglee42.yoyos.common.init.YoyosEntities;
-import fr.iglee42.yoyos.network.ToggleYoyoAttackC2S;
-import fr.iglee42.yoyos.network.ToggleYoyoEnchantC2S;
 import fr.iglee42.yoyos.network.YoyosNetwork;
+import fr.iglee42.yoyos.network.payloads.ToggleAttackC2SPayload;
+import fr.iglee42.yoyos.network.payloads.ToggleEnchantmentC2SPayload;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class YoyoConfigScreen extends Screen {
     protected YoyoConfigScreen() {
@@ -21,22 +23,27 @@ public class YoyoConfigScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+        HolderLookup.Provider provider = minecraft.player.registryAccess();
+        HolderLookup.RegistryLookup<Enchantment> enchantments = provider.lookupOrThrow(Registries.ENCHANTMENT);
         addRenderableWidget(new ExpandingWidget(width / 2 -1,height / 2 - 88,40,40,2,widget->{
-            YoyosNetwork.CHANNEL.sendToServer(new ToggleYoyoAttackC2S(InteractionHand.MAIN_HAND));
+            PacketDistributor.sendToServer(new ToggleAttackC2SPayload(InteractionHand.MAIN_HAND));
         },()-> YoyoItem.isAttackEnable(minecraft.player.getMainHandItem()),Items.DIAMOND_SWORD,
                 Component.translatable("tooltip.yoyos.attack"),()-> true));
+
         addRenderableWidget(new ExpandingWidget(width / 2 -1,height / 2 - 44,40,40,2,widget->{
-            YoyosNetwork.CHANNEL.sendToServer(new ToggleYoyoEnchantC2S(YoyosEnchantments.COLLECTING.getId(), InteractionHand.MAIN_HAND));
-        },()-> YoyoItem.isEnchantmentEnable(minecraft.player.getMainHandItem(), YoyosEnchantments.COLLECTING.getId()),Items.HOPPER,
-                Component.translatable(YoyosEnchantments.COLLECTING.get().getDescriptionId()),()-> ((YoyoItem)Minecraft.getInstance().player.getMainHandItem().getItem()).getMaxCollectedDrops(Minecraft.getInstance().player.getMainHandItem()) > 0));
+            PacketDistributor.sendToServer(new ToggleEnchantmentC2SPayload(InteractionHand.MAIN_HAND, YoyosEnchantments.COLLECTING.location()));
+        },()-> YoyoItem.isEnchantmentEnable(minecraft.player.getMainHandItem(), YoyosEnchantments.COLLECTING, provider),Items.HOPPER,
+                enchantments.getOrThrow(YoyosEnchantments.COLLECTING).value().description().copy(),()-> ((YoyoItem)Minecraft.getInstance().player.getMainHandItem().getItem()).getMaxCollectedDrops(Minecraft.getInstance().player.getMainHandItem(),minecraft.player.registryAccess()) > 0));
+
         addRenderableWidget(new ExpandingWidget(width / 2 -1,height / 2 + 1,40,40,2,widget->{
-            YoyosNetwork.CHANNEL.sendToServer(new ToggleYoyoEnchantC2S(YoyosEnchantments.BREAKING.getId(), InteractionHand.MAIN_HAND));
-        },()-> YoyoItem.isEnchantmentEnable(minecraft.player.getMainHandItem(), YoyosEnchantments.BREAKING.getId()), Items.DIAMOND_PICKAXE,
-                Component.translatable(YoyosEnchantments.BREAKING.get().getDescriptionId()),()-> Minecraft.getInstance().player.getMainHandItem().getEnchantmentLevel(YoyosEnchantments.BREAKING.get()) > 0 && !YoyoItem.isEnchantmentEnable(minecraft.player.getMainHandItem(), YoyosEnchantments.CRAFTING.getId())));
+            PacketDistributor.sendToServer(new ToggleEnchantmentC2SPayload(InteractionHand.MAIN_HAND, YoyosEnchantments.BREAKING.location()));
+        },()-> YoyoItem.isEnchantmentEnable(minecraft.player.getMainHandItem(), YoyosEnchantments.BREAKING, provider), Items.DIAMOND_PICKAXE,
+                Enchantment.getFullname(enchantments.getOrThrow(YoyosEnchantments.BREAKING),1),()-> Minecraft.getInstance().player.getMainHandItem().getEnchantmentLevel(enchantments.getOrThrow(YoyosEnchantments.BREAKING)) > 0 && !YoyoItem.isEnchantmentEnable(minecraft.player.getMainHandItem(), YoyosEnchantments.CRAFTING,minecraft.player.registryAccess())));
+
         addRenderableWidget(new ExpandingWidget(width / 2 -1,height / 2 + 46,40,40,2,widget->{
-            YoyosNetwork.CHANNEL.sendToServer(new ToggleYoyoEnchantC2S(YoyosEnchantments.CRAFTING.getId(), InteractionHand.MAIN_HAND));
-        },()-> YoyoItem.isEnchantmentEnable(minecraft.player.getMainHandItem(), YoyosEnchantments.CRAFTING.getId()), Items.CRAFTING_TABLE,
-                Component.translatable(YoyosEnchantments.CRAFTING.get().getDescriptionId()),()-> Minecraft.getInstance().player.getMainHandItem().getEnchantmentLevel(YoyosEnchantments.CRAFTING.get()) > 0 && !YoyoItem.isEnchantmentEnable(minecraft.player.getMainHandItem(), YoyosEnchantments.BREAKING.getId())));
+            PacketDistributor.sendToServer(new ToggleEnchantmentC2SPayload(InteractionHand.MAIN_HAND, YoyosEnchantments.CRAFTING.location()));
+        },()-> YoyoItem.isEnchantmentEnable(minecraft.player.getMainHandItem(), YoyosEnchantments.CRAFTING, provider), Items.CRAFTING_TABLE,
+                Enchantment.getFullname(enchantments.getOrThrow(YoyosEnchantments.CRAFTING),1),()-> Minecraft.getInstance().player.getMainHandItem().getEnchantmentLevel(enchantments.getOrThrow(YoyosEnchantments.CRAFTING)) > 0 && !YoyoItem.isEnchantmentEnable(minecraft.player.getMainHandItem(), YoyosEnchantments.BREAKING,minecraft.player.registryAccess())));
     }
 
     @Override

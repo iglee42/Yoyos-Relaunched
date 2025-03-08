@@ -96,7 +96,7 @@ public class YoyoRenderer extends EntityRenderer<YoyoEntity> {
         if (player != null) {
             stack.pushPose();
             int armDirection = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
-            if (player.getOffhandItem().equals(entity.getYoyoStack(),false)){
+            if (player.getOffhandItem().equals(entity.getYoyoStack())){
                 armDirection = -armDirection;
             }
             float attackAnimation = player.getAttackAnim(partialTicks);
@@ -186,10 +186,9 @@ public class YoyoRenderer extends EntityRenderer<YoyoEntity> {
             b *= 0.7f;
         }
 
-        vertexBuffer.vertex(pose.pose(), currentX, currentY, currentZ)
-                .color(r, g, b,1)
-                .normal(pose.normal(), nextX, nextY, nextZ)
-                .endVertex();
+        vertexBuffer.addVertex(pose.pose(), currentX, currentY, currentZ)
+                .setColor(r, g, b,1)
+                .setNormal(pose.copy(), nextX, nextY, nextZ);
     }
 
 

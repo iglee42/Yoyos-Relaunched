@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "yoyos:wooden_yoyo",
+    "yoyos:stone_yoyo",
+    "yoyos:copper_yoyo",
+    "yoyos:iron_yoyo",
+    "yoyos:golden_yoyo",
+    "yoyos:diamond_yoyo",
+    "yoyos:netherite_yoyo",
+    "yoyos:creative_yoyo"
+  ]
+}

@@ -7,31 +7,20 @@ import fr.iglee42.yoyos.common.init.YoyosSounds;
 import me.desht.pneumaticcraft.api.PNCCapabilities;
 import me.desht.pneumaticcraft.api.pressure.IPressurizableItem;
 import me.desht.pneumaticcraft.api.tileentity.IAirHandler;
-import me.desht.pneumaticcraft.common.capabilities.AirHandlerItemStack;
-import me.desht.pneumaticcraft.common.config.ConfigHelper;
-import me.desht.pneumaticcraft.common.item.PressurizableItem;
+import me.desht.pneumaticcraft.common.registry.ModDataComponents;
 import me.desht.pneumaticcraft.common.upgrades.ModUpgrades;
-import me.desht.pneumaticcraft.common.util.PneumaticCraftUtils;
-import me.desht.pneumaticcraft.common.util.UpgradableItemUtils;
+import me.desht.pneumaticcraft.common.upgrades.UpgradableItemUtils;
 import me.desht.pneumaticcraft.lib.PneumaticValues;
-import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.function.Consumer;
-
-import static me.desht.pneumaticcraft.common.item.PressurizableItem.roundedPressure;
 
 public class PressurizedYoyoItem extends YoyoItem implements IPressurizableItem {
 
@@ -39,11 +28,13 @@ public class PressurizedYoyoItem extends YoyoItem implements IPressurizableItem 
     private final float maxPressure;
 
     public PressurizedYoyoItem(YoyoTier tier) {
-        super(tier);
+        super(new Properties().stacksTo(1).component(ModDataComponents.AIR,0),tier);
 
         this.volume = PneumaticValues.VORTEX_CANNON_VOLUME;
         this.maxPressure = (float) PneumaticValues.VORTEX_CANNON_MAX_AIR  / volume;
     }
+
+
 
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
@@ -56,18 +47,19 @@ public class PressurizedYoyoItem extends YoyoItem implements IPressurizableItem 
     }
 
     static boolean shouldShowPressureDurability(ItemStack stack) {
-        return stack.getCapability(PNCCapabilities.AIR_HANDLER_ITEM_CAPABILITY)
+        return PNCCapabilities.getAirHandler(stack)
                 .map(airHandler -> airHandler.getPressure() < airHandler.maxPressure())
                 .orElse(false);
     }
 
 
     @Override
-    public int getBarWidth(ItemStack pStack) {
-        return pStack.getCapability(PNCCapabilities.AIR_HANDLER_ITEM_CAPABILITY)
+    public int getBarWidth(ItemStack stack) {
+        return PNCCapabilities.getAirHandler(stack)
                 .map(h -> Math.round(h.getPressure() / h.maxPressure() * 13F))
                 .orElse(0);
     }
+
 
 
     @Override
@@ -76,23 +68,11 @@ public class PressurizedYoyoItem extends YoyoItem implements IPressurizableItem 
     }
 
     static int getPressureDurabilityColor(ItemStack stack) {
-        return stack.getCapability(PNCCapabilities.AIR_HANDLER_ITEM_CAPABILITY).map(airHandler -> {
+        return PNCCapabilities.getAirHandler(stack).map(airHandler -> {
             float f = airHandler.getPressure() / airHandler.maxPressure();
             int c = (int) (64 + 191 * f);
             return 0x40 << 16 | c << 8 | 0xFF;
         }).orElse(0xC0C0C0);
-    }
-
-    @Nullable
-    @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
-        return new AirHandlerItemStack(stack);
-    }
-
-    @Nullable
-    @Override
-    public CompoundTag getShareTag(ItemStack stack) {
-        return ConfigHelper.common().advanced.nbtToClientModification.get() ? roundedPressure(stack) : super.getShareTag(stack);
     }
 
 
@@ -108,8 +88,7 @@ public class PressurizedYoyoItem extends YoyoItem implements IPressurizableItem 
 
     @Override
     public int getAir(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag != null ? tag.getInt(AirHandlerItemStack.AIR_NBT_KEY) : 0;
+        return stack.getOrDefault(ModDataComponents.AIR.get(), 0);
     }
 
     @Override
@@ -118,8 +97,8 @@ public class PressurizedYoyoItem extends YoyoItem implements IPressurizableItem 
     }
 
     @Override
-    public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T entity, Consumer<T> onBroken) {
-        IAirHandler airHandler = stack.getCapability(PNCCapabilities.AIR_HANDLER_ITEM_CAPABILITY).orElseThrow(RuntimeException::new);
+    public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T entity, Consumer<Item> onBroken) {
+        IAirHandler airHandler = PNCCapabilities.getAirHandler(stack).orElseThrow(RuntimeException::new);
 
         airHandler.addAir(-Math.min(airHandler.getAir(),amount * 50));
         return 0;
@@ -151,22 +130,4 @@ public class PressurizedYoyoItem extends YoyoItem implements IPressurizableItem 
         return InteractionResultHolder.success(stack);
     }
 
-    @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level p_41422_, List<Component> tooltips, TooltipFlag p_41424_) {
-        stack.getCapability(PNCCapabilities.AIR_HANDLER_ITEM_CAPABILITY).ifPresent((airHandler) -> {
-            float f = airHandler.getPressure() / airHandler.maxPressure();
-            ChatFormatting color;
-            if (f < 0.1F) {
-                color = ChatFormatting.RED;
-            } else if (f < 0.5F) {
-                color = ChatFormatting.GOLD;
-            } else {
-                color = ChatFormatting.DARK_GREEN;
-            }
-
-            tooltips.add(PneumaticCraftUtils.xlate("pneumaticcraft.gui.tooltip.pressure", PneumaticCraftUtils.roundNumberTo(airHandler.getPressure(), 1)).withStyle(color));
-        });
-
-        super.appendHoverText(stack, p_41422_, tooltips, p_41424_);
-    }
 }

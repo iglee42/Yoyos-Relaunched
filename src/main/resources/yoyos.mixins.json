@@ -5,9 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "yoyos.refmap.json",
   "mixins": [
-    "EnchantedBookItemMixin",
-    "ItemStackMixin",
-    "ResourcePackLoaderMixin"
+    "ItemStackMixin"
   ],
   "client": [
   ],

@@ -5,7 +5,6 @@ import fr.iglee42.yoyos.compat.IYoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPluginHelper;
 import net.minecraft.world.item.Tiers;
-import net.minecraftforge.fml.ModList;
 
 @YoyoPlugin
 public class CreatePlugin implements IYoyoPlugin {

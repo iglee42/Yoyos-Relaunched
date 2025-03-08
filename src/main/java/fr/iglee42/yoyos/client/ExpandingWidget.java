@@ -1,23 +1,18 @@
 package fr.iglee42.yoyos.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import fr.iglee42.igleelib.api.utils.MouseUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.awt.*;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class ExpandingWidget extends AbstractWidget {
@@ -65,7 +60,7 @@ public class ExpandingWidget extends AbstractWidget {
 
         graphics.pose().pushPose();
         graphics.pose().scale(0.75f,0.75f,0.75f);
-        graphics.drawCenteredString(Minecraft.getInstance().font,getMessage(), (int) (getX() / 0.75f), (int) ((getY() + 6) / 0.75f), toggled.get() ? ChatFormatting.GREEN.getColor():ChatFormatting.RED.getColor());
+        graphics.drawCenteredString(Minecraft.getInstance().font,getMessage().copy().withStyle(toggled.get() ? ChatFormatting.GREEN:ChatFormatting.RED), (int) (getX() / 0.75f), (int) ((getY() + 6) / 0.75f), toggled.get() ? ChatFormatting.GREEN.getColor():ChatFormatting.RED.getColor());
         graphics.pose().popPose();
 
         if(!(ticksSinceOpen <= animationDurationTicks) && !collapsing) {

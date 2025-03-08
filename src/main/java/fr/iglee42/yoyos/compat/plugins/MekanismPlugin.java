@@ -1,6 +1,5 @@
 package fr.iglee42.yoyos.compat.plugins;
 
-import fr.iglee42.yoyos.Yoyos;
 import fr.iglee42.yoyos.common.YoyoItem;
 import fr.iglee42.yoyos.common.YoyoTier;
 import fr.iglee42.yoyos.compat.IYoyoPlugin;
@@ -10,7 +9,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Tiers;
-import net.minecraftforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.CommonHooks;
 
 import java.util.UUID;
 
@@ -50,7 +49,7 @@ public class MekanismPlugin implements IYoyoPlugin {
                 .addEntityInteraction((yoyoStack, player, hand, yoyo, target) -> {
                     if (!yoyo.canAttack() || !target.isAlive()) return false;
                     if (!YoyoItem.isAttackEnable(yoyoStack)) return false;
-                    if (!ForgeHooks.onPlayerAttackTarget(player, target)) return false;
+                    if (!CommonHooks.onPlayerAttackTarget(player, target)) return false;
 
                     UUID entityUUID = target.getUUID();
 

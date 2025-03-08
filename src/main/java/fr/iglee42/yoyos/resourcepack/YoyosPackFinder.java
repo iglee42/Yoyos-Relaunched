@@ -1,6 +1,7 @@
 package fr.iglee42.yoyos.resourcepack;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
@@ -9,6 +10,8 @@ import net.minecraft.world.flag.FeatureFlags;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
+
+import static net.minecraft.server.packs.repository.BuiltInPackSource.fixedResources;
 
 public class YoyosPackFinder implements RepositorySource {
 
@@ -23,8 +26,7 @@ public class YoyosPackFinder implements RepositorySource {
 	@Override
 	public void loadPacks(Consumer<Pack> consumer) {
 		Path rootPath = PathConstant.ROOT_PATH;
-		Pack pack = Pack.create("yoyos_"+type.getSuffix(),Component.literal("Yoyos Builtin Pack"),true,
-				(t)-> new InMemoryPack(rootPath),new Pack.Info(Component.literal("Builtin resource pack for Yoyos"),12,12, FeatureFlagSet.of(FeatureFlags.VANILLA),true),type.getVanillaType(), Pack.Position.TOP,true, PackSource.BUILT_IN);
+		Pack pack = Pack.readMetaAndCreate(InMemoryPack.getPackInfo(type.getVanillaType()),fixedResources(new InMemoryPack(type.getVanillaType(),rootPath)),type.getVanillaType(),new PackSelectionConfig(true, Pack.Position.TOP,true));
 		if (pack != null) {
 			consumer.accept(pack);
 		}

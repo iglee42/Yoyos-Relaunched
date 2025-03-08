@@ -1,7 +1,6 @@
 package fr.iglee42.yoyos.compat.plugins;
 
 import fr.iglee42.yoyos.Yoyos;
-import fr.iglee42.yoyos.common.YoyoItem;
 import fr.iglee42.yoyos.common.YoyoTier;
 import fr.iglee42.yoyos.compat.IYoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPlugin;
@@ -11,17 +10,16 @@ import fr.iglee42.yoyos.compat.botania.GaiaYoyoItem;
 import fr.iglee42.yoyos.compat.botania.ManaYoyoItem;
 import fr.iglee42.yoyos.compat.botania.TerrasteelYoyoItem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tiers;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import vazkii.botania.client.core.handler.ClientTickHandler;
-import vazkii.botania.common.item.BotaniaItems;
 import vazkii.botania.common.lib.BotaniaTags;
 
 import java.util.ArrayList;
@@ -114,7 +112,7 @@ public class BotaniaPlugin implements IYoyoPlugin {
 
     @Override
     public void registerItems(RegisterEvent event) {
-        event.register(Registries.ITEM,new ResourceLocation(Yoyos.MODID,"mana_cord"),()-> new Item(new Item.Properties()));
+        event.register(Registries.ITEM,ResourceLocation.fromNamespaceAndPath(Yoyos.MODID,"mana_cord"),()-> new Item(new Item.Properties()));
     }
 
     @Override
@@ -128,6 +126,6 @@ public class BotaniaPlugin implements IYoyoPlugin {
 
     @Override
     public void clientSetup(FMLClientSetupEvent event) {
-        Minecraft.getInstance().getItemColors().register((s,t)->t == 1 ? Mth.hsvToRgb(ClientTickHandler.ticksInGame * 2 % 360 / 360F, 0.25F, 1F) : -1, ForgeRegistries.ITEMS.getValue(new ResourceLocation("yoyos:gaia_spirit_yoyo")));
+        Minecraft.getInstance().getItemColors().register((s,t)->t == 1 ? Mth.hsvToRgb(ClientTickHandler.ticksInGame * 2 % 360 / 360F, 0.25F, 1F) : -1, BuiltInRegistries.ITEM.get(ResourceLocation.parse("yoyos:gaia_spirit_yoyo")));
     }
 }
