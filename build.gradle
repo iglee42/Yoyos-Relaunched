@@ -96,7 +96,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 repositories {
 
     maven {
-        url "https://iglee.fr:8081/releases"
+        url "https://maven.iglee.fr/releases"
     }
     maven {
         url "https://cursemaven.com"
