@@ -32,6 +32,7 @@ public class YoyoTier {
     private String mod = "";
     private String customRecipe = "";
     private String customModel = "";
+    private final List<Object> customConstructorParameters = new ArrayList<>();
 
     public YoyoTier(String name,Tier tier,String plugin){
         this.name = name;
@@ -158,6 +159,10 @@ public class YoyoTier {
         return customModel;
     }
 
+    public List<Object> getCustomConstructorParameters() {
+        return customConstructorParameters;
+    }
+
     // Setters
 
     public YoyoTier setWeight(double weight) {
@@ -219,6 +224,11 @@ public class YoyoTier {
 
     public YoyoTier setCustomModel(String customModel){
         this.customModel = customModel;
+        return this;
+    }
+
+    public YoyoTier addCustomConstructorParameters(Object... parameters){
+        customConstructorParameters.addAll(List.of(parameters));
         return this;
     }
 

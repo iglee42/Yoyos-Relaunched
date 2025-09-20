@@ -32,6 +32,7 @@ public class RecipesGenerator {
 
     private static void yoyo(String name,String cord,String item,String mod,String stick){
         try {
+            String[] splitItem = item.split(":");
             FileWriter writer = new FileWriter(new File(PathConstant.RECIPES_PATH.toFile(), name+"_yoyo.json"));
             writer.write("{\n" +
                     "  \"type\": \"minecraft:crafting_shaped\",\n" +
@@ -41,7 +42,7 @@ public class RecipesGenerator {
                     "      \"item\": \"yoyos:"+cord+"cord\"\n" +
                     "    },\n" +
                     "    \"I\": {\n" +
-                    "      \"item\": \""+mod+":"+(item.isEmpty() ? name +"_ingot" : item)+"\"\n" +
+                    "      \"item\": \""+(splitItem.length == 2 ? splitItem[0] : mod)+":"+(item.isEmpty() ? name +"_ingot" : splitItem[splitItem.length - 1])+"\"\n" +
                     "    },\n" +
                     "    \"S\": {\n" +
                     "      \"item\": \""+stick+"\"\n" +

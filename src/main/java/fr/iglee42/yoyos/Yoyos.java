@@ -110,6 +110,9 @@ public class Yoyos {
 
         try {
             pluginHelper.init();
+            loadedPlugins.forEach(p->{
+                p.registerYoyosAfterHelperInit(pluginHelper);
+            });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

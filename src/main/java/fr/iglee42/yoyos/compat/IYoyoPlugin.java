@@ -24,4 +24,6 @@ public interface IYoyoPlugin {
     default void init(YoyoPluginHelper helper){}
 
     default void clientSetup(FMLClientSetupEvent event){};
+
+    default void registerYoyosAfterHelperInit(YoyoPluginHelper helper){}
 }

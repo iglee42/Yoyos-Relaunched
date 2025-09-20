@@ -31,6 +31,11 @@ public class YoyoPluginHelper {
         tempsYoyo.add(yoyoTier);
     }
 
+    public void registerYoyoAfterInit(YoyoTier yoyoTier){
+        if (YOYO_TIERS.stream().anyMatch(y->y.getName().equals(yoyoTier.getName()))) return;
+        YOYO_TIERS.add(yoyoTier);
+    }
+
     public void init() throws IOException {
         if (Config.getConfigFile().exists()) {
             for (YoyoTier t : tempsYoyo) {
@@ -59,8 +64,9 @@ public class YoyoPluginHelper {
             event.register(Registries.ITEM, new ResourceLocation(Yoyos.MODID, t.getName().toLowerCase() + "_yoyo"), () -> {
                 if (t.getCustomConstructor() != null){
                     try {
-                        return t.getCustomConstructor().newInstance(t).addEntityInteraction(t.getEntityInteractions().toArray(new EntityInteraction[]{})).addBlockInteraction(t.getBlockInteractions().toArray(new BlockInteraction[]{}));
-                    } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {
+                        t.getCustomConstructorParameters().add(0,t);
+                        return t.getCustomConstructor().newInstance(t.getCustomConstructorParameters().toArray()).addEntityInteraction(t.getEntityInteractions().toArray(new EntityInteraction[]{})).addBlockInteraction(t.getBlockInteractions().toArray(new BlockInteraction[]{}));
+                    } catch (InstantiationException | InvocationTargetException | IllegalAccessException | IllegalArgumentException ignored) {
                         return new YoyoItem(t).addEntityInteraction(t.getEntityInteractions().toArray(new EntityInteraction[]{})).addBlockInteraction(t.getBlockInteractions().toArray(new BlockInteraction[]{}));
                     }
                 } else {

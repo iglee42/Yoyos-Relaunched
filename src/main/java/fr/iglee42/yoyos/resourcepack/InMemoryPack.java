@@ -134,7 +134,7 @@ public class InMemoryPack implements PackResources {
         JsonObject jsonobject = new JsonObject();
         JsonObject packObject = new JsonObject();
         packObject.addProperty("pack_format", 16);
-        packObject.addProperty("description", "RS Pack");
+        packObject.addProperty("description", "Yoyos Pack");
         jsonobject.add("pack", packObject);
         if (!jsonobject.has(deserializer.getMetadataSectionName())) {
             return null;
@@ -149,7 +149,7 @@ public class InMemoryPack implements PackResources {
 
     @Override
     public String packId() {
-        return "RS InCode Pack";
+        return "Yoyos InCode Pack";
     }
 
 
