@@ -1,0 +1,25 @@
+{
+  "loader": "tconstruct:tool",
+  "parent": "tconstruct:item/base/bow",
+  "textures": {
+    "front":    "yoyos:item/tool/yoyo/front",
+    "back":    "yoyos:item/tool/yoyo/back",
+    "cord": "yoyos:item/tool/yoyo/cord"
+  },
+  "modifier_roots": [ "yoyos:item/tool/yoyo/modifiers/" ],
+"parts": [
+  { "name": "front",    "index": 1 },
+  { "name": "back",  "index": 0 },
+  { "name": "cord", "index": 3 }
+  ],
+  "overrides": [
+    {
+      "predicate": { "tconstruct:charging": 2 },
+      "model": "yoyos:item/tool/yoyo/blocking"
+    },
+    {
+      "predicate": { "tconstruct:broken": 1 },
+      "model": "yoyos:item/tool/yoyo/broken"
+    }
+  ]
+}

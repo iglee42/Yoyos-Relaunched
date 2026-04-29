@@ -15,6 +15,14 @@
   "item.yoyos.cheese_string": "Cheese String",
   "item.yoyos.cheese_cord": "Cheese Cord",
 
+  "item.yoyos.yoyo": "Yoyo",
+  "item.yoyos.yoyo.description": "The Yoyo is a ranged weapon that does a lot of damage.",
+  "item.yoyos.yoyo_cord": "Yoyo Cord",
+  "item.yoyos.yoyo_plate": "Yoyo Plate",
+  "item.yoyos.yoyo_plate_cast": "Yoyo Plate Gold Cast",
+  "item.yoyos.yoyo_plate_sand_cast": "Yoyo Plate Sand Cast",
+  "item.yoyos.yoyo_plate_red_sand_cast": "Yoyo Plate Red Sand Cast",
+
   "entity.yoyo.throw.subtitle": "Yoyo thrown",
 
   "enchantment.yoyos.collecting": "Collecting",
@@ -30,5 +38,14 @@
   "tooltip.yoyos.attack": "Attack",
 
   "key.yoyos.open_config": "Open Yoyo's Config",
-  "key.yoyos.category": "Yoyos"
+  "key.yoyos.category": "Yoyos",
+  "tool_stat.yoyos.weight": "Weight: ",
+  "tool_stat.yoyos.length": "Length: ",
+  "tool_stat.yoyos.duration": "Duration: ",
+  "tool_stat.yoyos.weight.description": "Base value for yoyo's velocity calculations.\nSmaller it is, faster the yoyo will go.",
+  "pattern.yoyos.yoyo_plate": "Yoyo Plate",
+  "pattern.yoyos.yoyo_cord": "Yoyo Cord",
+
+  "stat.yoyos.yoyo_plate": "Yoyo Plate",
+  "stat.yoyos.yoyo_cord": "Yoyo Cord"
 }

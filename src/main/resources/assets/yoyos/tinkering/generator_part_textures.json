@@ -1,0 +1,25 @@
+{
+  "parts": [
+    {
+      "path": "yoyos:item/tool/yoyo/parts/plate",
+      "stat_type": "yoyos:yoyo_plate"
+    },
+    {
+      "path": "yoyos:item/tool/yoyo/front",
+      "stat_type": "yoyos:yoyo_plate"
+    },
+    {
+      "path": "yoyos:item/tool/yoyo/front_broken",
+      "stat_type": "yoyos:yoyo_plate"
+    },
+    {
+      "path": "yoyos:item/tool/yoyo/back",
+      "stat_type": "yoyos:yoyo_plate"
+    },
+    {
+      "path": "yoyos:item/tool/yoyo/parts/cord",
+      "stat_type": "yoyos:yoyo_cord"
+    }
+  ],
+  "replace": false
+}

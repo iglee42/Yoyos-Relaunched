@@ -680,6 +680,7 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
 
         if (!level().isClientSide && shouldGetStats) {
             setMaxCollectedDrops(yoyo.getMaxCollectedDrops(stack));
+            if (stack.getItem() instanceof YoyoItem && YoyoItem.isEnchantmentEnable(stack,YoyosEnchantments.COLLECTING)) setMaxCollectedDrops(0);
             attackInterval = yoyo.getAttackInterval(stack);
             int duration = yoyo.getDuration(stack);
             setMaxTime(duration);
@@ -869,7 +870,7 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
     }
 
     public boolean isCollecting(){
-        return YoyoItem.isEnchantmentEnable(getYoyoStack(), YoyosEnchantments.COLLECTING) && getMaxCollectedDrops() > 0;
+        return getMaxCollectedDrops() > 0;
     }
 
     public float getThrowerEyeHeight(){

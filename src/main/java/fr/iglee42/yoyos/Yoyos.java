@@ -10,6 +10,7 @@ import fr.iglee42.yoyos.common.init.YoyosSounds;
 import fr.iglee42.yoyos.compat.IYoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPlugin;
 import fr.iglee42.yoyos.compat.YoyoPluginHelper;
+import fr.iglee42.yoyos.compat.plugins.TconstructPlugin;
 import fr.iglee42.yoyos.network.YoyosNetwork;
 import fr.iglee42.yoyos.resourcepack.PackType;
 import fr.iglee42.yoyos.resourcepack.PathConstant;
@@ -17,6 +18,7 @@ import fr.iglee42.yoyos.resourcepack.YoyosPackFinder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -33,6 +35,10 @@ import net.minecraftforge.registries.RegisterEvent;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Type;
 import org.slf4j.Logger;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
+import slimeknights.tconstruct.tools.TinkerToolParts;
+import slimeknights.tconstruct.tools.TinkerTools;
 
 import java.io.IOException;
 import java.util.*;
@@ -81,7 +87,6 @@ public class Yoyos {
                 Minecraft.getInstance().getResourcePackRepository().addPackFinder(new YoyosPackFinder(PackType.RESOURCE));
             }
         } catch (Exception ignored) {
-            throw new RuntimeException(ignored);
         }
 
     }
@@ -152,10 +157,27 @@ public class Yoyos {
 
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if (ModList.get().isLoaded("tconstruct")) {
+            if (event.getTabKey() == TinkerTools.tabTools.getKey()) {
+                ToolBuildHandler.addVariants(event::accept, TconstructPlugin.YOYO.get(), "");
+            }
+            if (event.getTabKey() == TinkerToolParts.tabToolParts.getKey()) {
+                TconstructPlugin.YOYO_PLATE.get().addVariants(event::accept, "");
+                TconstructPlugin.YOYO_CORD.get().addVariants(event::accept, "");
+            }
+        }
         if (event.getTabKey() != YoyosItems.TAB.getKey()) return;
-        ForgeRegistries.ITEMS.getKeys().stream().filter(rs->rs.getNamespace().equals(MODID)).forEach(rs->{
-            event.accept(ForgeRegistries.ITEMS.getDelegateOrThrow(rs));
-        });
+        List<ItemLike> dontshow = List.of(
+                TconstructPlugin.YOYO_PLATE,
+                TconstructPlugin.YOYO,
+                TconstructPlugin.YOYO_CORD
+        );
+        ForgeRegistries.ITEMS.getKeys()
+                .stream()
+                .filter(rs->rs.getNamespace().equals(MODID))
+                .map(ForgeRegistries.ITEMS::getDelegateOrThrow)
+                .filter(rs-> dontshow.stream().noneMatch(il->il.asItem().equals(rs.get())))
+                .forEach(event::accept);
     }
 
     public static YoyoPluginHelper getPluginHelper() {

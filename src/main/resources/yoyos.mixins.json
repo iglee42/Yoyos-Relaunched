@@ -2,12 +2,15 @@
   "required": true,
   "minVersion": "0.8",
   "package": "fr.iglee42.yoyos.mixins",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_17",
   "refmap": "yoyos.refmap.json",
+  "plugin": "fr.iglee42.yoyos.YoyosMixinConfig",
   "mixins": [
     "EnchantedBookItemMixin",
     "ItemStackMixin",
-    "ResourcePackLoaderMixin"
+    "MaterialRegistryMixin",
+    "ResourcePackLoaderMixin",
+    "TooltipUtilMixin"
   ],
   "client": [
   ],
