@@ -179,6 +179,10 @@ public class YoyoEntity extends Entity implements IEntityAdditionalSpawnData {
         CASTERS.put(player.getUUID(),this);
     }
 
+    @Override
+    public boolean canChangeDimensions() {
+        return false;
+    }
 
     /**
      * @return the amount of stack left uncollected

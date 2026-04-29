@@ -1,0 +1,9 @@
+{
+  "type": "tconstruct:table_casting_material",
+  "cast": {
+    "tag": "yoyos:casts/single_use/yoyo_plate"
+  },
+  "cast_consumed": true,
+  "item_cost": 4,
+  "result": "yoyos:yoyo_plate"
+}

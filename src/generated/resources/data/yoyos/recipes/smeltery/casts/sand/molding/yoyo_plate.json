@@ -1,0 +1,11 @@
+{
+  "type": "tconstruct:molding_table",
+  "material": {
+    "tag": "tconstruct:casts/sand"
+  },
+  "pattern": {
+    "type": "tconstruct:material",
+    "item": "yoyos:yoyo_plate"
+  },
+  "result": "yoyos:yoyo_plate_sand_cast"
+}

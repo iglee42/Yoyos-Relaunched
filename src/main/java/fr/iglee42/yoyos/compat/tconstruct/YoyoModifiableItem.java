@@ -37,6 +37,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import slimeknights.tconstruct.library.client.materials.MaterialTooltipCache;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
 import slimeknights.tconstruct.library.modifiers.modules.build.SetStatModule;
 import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
@@ -79,7 +80,8 @@ public class YoyoModifiableItem extends ModifiableItem implements IYoyo {
 
     @Override
     public int getAttackInterval(ItemStack yoyo) {
-        return 10;
+        ToolStack item = ToolStack.from(yoyo);
+        return (int)(Math.ceil(11 / Math.sqrt(item.getStats().get(ToolStats.ATTACK_SPEED)))) + 1;
     }
 
     @Override
@@ -94,14 +96,22 @@ public class YoyoModifiableItem extends ModifiableItem implements IYoyo {
 
     @Override
     public void entityInteraction(ItemStack yoyoStack, Player player, InteractionHand hand, YoyoEntity yoyo, Entity target) {
-        if (!target.level().isClientSide) return;
+        if (target.level().isClientSide) return;
         new EntityInteraction() {
             @Override
             public boolean apply(ItemStack yoyoStack, Player player, InteractionHand hand, YoyoEntity yoyo, Entity target) {
                 IToolStackView view = ToolStack.from(yoyoStack);
                 if (view.isBroken()) return false;
                 if (!yoyo.canAttack() || !target.isAttackable()) return false;
-                ToolAttackUtil.attackEntity(view,player,hand,target,()->0,false);
+                ToolAttackUtil.performAttack(view, ToolAttackContext
+                        .attacker(player)
+                        .hand(hand)
+                        .target(target)
+                        .toolAttributes(view)
+                        .defaultCooldown()
+                        .baseDamage(ConditionalStatModifierHook.getModifiedStat(view, player, ToolStats.PROJECTILE_DAMAGE))
+                        .build());
+                yoyo.resetAttackCooldown();
                 return true;
             }
         }.apply(yoyoStack,player,hand,yoyo,target);

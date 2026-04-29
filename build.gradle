@@ -116,7 +116,7 @@ minecraft {
             workingDirectory project.file('run-data')
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/'), "--existing-mod","tconstruct"
         }
     }
 }
@@ -199,7 +199,7 @@ dependencies {
     compileOnly fg.deobf("curse.maven:codechicken-lib-1-8-242818:5753868")
 
     implementation fg.deobf("curse.maven:tinkers-construct-74072:7449219")
-    implementation fg.deobf("curse.maven:mantle-74924:6819217")
+    implementation fg.deobf("curse.maven:mantle-74924:7563777")
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html

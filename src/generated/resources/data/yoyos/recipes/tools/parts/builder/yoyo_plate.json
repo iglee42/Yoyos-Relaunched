@@ -1,0 +1,16 @@
+{
+  "type": "tconstruct:part_builder",
+  "cost": 4,
+  "pattern": "yoyos:yoyo_plate",
+  "pattern_item": [
+    {
+      "tag": "tconstruct:patterns/default"
+    },
+    {
+      "item": "yoyos:yoyo_plate_cast"
+    }
+  ],
+  "result": {
+    "item": "yoyos:yoyo_plate"
+  }
+}

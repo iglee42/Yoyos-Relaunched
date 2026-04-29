@@ -1,0 +1,10 @@
+{
+  "stats": {
+    "yoyos:yoyo_plate": {
+      "attack_damage": 1.0,
+      "durability": 375,
+      "mining_tier": "minecraft:iron",
+      "weight": 1.2
+    }
+  }
+}

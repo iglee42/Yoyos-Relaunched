@@ -1,0 +1,27 @@
+{
+  "loader": "tconstruct:tool",
+  "parent": "tconstruct:item/base/bow",
+  "textures": {
+    "front": "yoyos:item/tool/yoyo/front_broken",
+    "back": "yoyos:item/tool/yoyo/back",
+    "cord": "yoyos:item/tool/yoyo/cord_broken"
+  },
+  "modifier_roots": [
+    "yoyos:item/tool/yoyo/modifiers/broken/",
+    "yoyos:item/tool/yoyo/modifiers/"
+  ],
+  "parts": [
+    {
+      "name": "front",
+      "index": 1
+    },
+    {
+      "name": "back",
+      "index": 0
+    },
+    {
+      "name": "cord",
+      "index": 3
+    }
+  ]
+}

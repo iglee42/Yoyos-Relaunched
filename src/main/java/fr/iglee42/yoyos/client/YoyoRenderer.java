@@ -70,7 +70,7 @@ public class YoyoRenderer extends EntityRenderer<YoyoEntity> {
 
         }
 
-        itemRenderer.renderStatic(entity.getYoyoStack(), ItemDisplayContext.NONE,p_114490_,0,stack,p_114489_,Minecraft.getInstance().level,p_114490_);
+        itemRenderer.renderStatic(entity.getYoyoStack(), ItemDisplayContext.NONE,p_114490_,OverlayTexture.NO_OVERLAY,stack,p_114489_,Minecraft.getInstance().level,p_114490_);
         stack.popPose();
 
         if (entity.isCollecting() && !entity.getCollectedDrops().isEmpty()) {
