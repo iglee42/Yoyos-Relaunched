@@ -25,6 +25,7 @@ public class YoyosDataGenerator {
         //generator.addProvider(event.includeClient(),new YoyosItemModelsGenerator(output,helper));
         //generator.addProvider(event.includeClient(),new YoyosLangGenerator(output));
         generator.addProvider(event.includeServer(),new YoyosToolDefinitionGenerator(output));
+        generator.addProvider(event.includeServer(),new YoyosModifierGenerator(output));
         generator.addProvider(event.includeServer(),new YoyosStationLayoutsGenerator(output));
         generator.addProvider(event.includeClient(),new YoyosToolsModelGenerator(output,helper));
         var blockTagsProvider = new YoyosBlocksTagsProvider(output,event.getLookupProvider(),helper);

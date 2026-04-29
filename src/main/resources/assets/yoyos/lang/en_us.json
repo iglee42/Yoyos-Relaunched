@@ -47,5 +47,9 @@
   "pattern.yoyos.yoyo_cord": "Yoyo Cord",
 
   "stat.yoyos.yoyo_plate": "Yoyo Plate",
-  "stat.yoyos.yoyo_cord": "Yoyo Cord"
+  "stat.yoyos.yoyo_cord": "Yoyo Cord",
+
+  "modifier.yoyos.collecting_items": "Item Collecting",
+  "modifier.yoyos.collecting_items.flavor": "Does it stick blocks too ?",
+  "modifier.yoyos.collecting_items.description": "Allows the yoyo to pickup items on the ground."
 }

@@ -21,7 +21,7 @@ import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import java.util.List;
 
 public record YoyoCordMaterialStats( float length, float duration) implements IMaterialStats {
-  public static final MaterialStatsId ID = new MaterialStatsId(new ResourceLocation(Yoyos.MODID,"yoyo_cord"));
+  public static final MaterialStatsId ID = new MaterialStatsId(ResourceLocation.fromNamespaceAndPath(Yoyos.MODID,"yoyo_cord"));
   public static final MaterialStatType<YoyoCordMaterialStats> TYPE = new MaterialStatType<>(ID, new YoyoCordMaterialStats(5f,3f), RecordLoadable.create(
     FloatLoadable.FROM_ZERO.defaultField("length", 5f, true, YoyoCordMaterialStats::length),
     FloatLoadable.FROM_ZERO.defaultField("duration", 3f, true, YoyoCordMaterialStats::duration),

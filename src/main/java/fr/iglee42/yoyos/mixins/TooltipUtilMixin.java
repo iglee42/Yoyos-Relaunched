@@ -28,7 +28,7 @@ public class TooltipUtilMixin {
             builder.addOptional(TconstructPlugin.WEIGHT_STAT);
             builder.addOptional(TconstructPlugin.LENGTH_STAT);
             builder.addOptional(TconstructPlugin.DURATION_STAT);
-            builder.addOptional(ToolStats.PROJECTILE_DAMAGE);
+            builder.addOptional(ToolStats.ATTACK_DAMAGE);
         }
     }
 

@@ -22,12 +22,14 @@ import slimeknights.tconstruct.common.registration.CastItemObject;
 import slimeknights.tconstruct.common.registration.ItemDeferredRegisterExtension;
 import slimeknights.tconstruct.library.client.model.TinkerItemProperties;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
+import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.item.ModifiableItem;
 import slimeknights.tconstruct.library.tools.part.ToolPartItem;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ToolStatId;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
+import slimeknights.tconstruct.tools.data.ModifierIds;
 
 import static slimeknights.tconstruct.library.client.model.tools.ToolModel.registerItemColors;
 @YoyoPlugin
@@ -44,6 +46,9 @@ public class TconstructPlugin implements IYoyoPlugin {
     public static final ItemObject<ToolPartItem> YOYO_CORD = ITEMS.register("yoyo_cord", () -> new ToolPartItem(new Item.Properties(), YoyoCordMaterialStats.ID));
 
     public static final CastItemObject YOYO_PLATE_CAST = ITEMS.registerCast(YOYO_PLATE, new Item.Properties());
+
+    public static final ModifierId ITEM_COLLECTING_MODIFIER = new ModifierId(Yoyos.MODID,"collecting_items");
+
     @Override
     public String modId() {
         return "tconstruct";

@@ -1,0 +1,28 @@
+{
+  "type": "tconstruct:multilevel_modifier",
+  "allow_crystal": true,
+  "inputs": [
+    {
+      "amount_needed": 5,
+      "item": "minecraft:hopper"
+    },
+    {
+      "amount_needed": 10,
+      "tag": "forge:slimeballs"
+    }
+  ],
+  "levels": [
+    {
+      "level": {
+        "max": 5
+      },
+      "slots": {
+        "upgrades": 1
+      }
+    }
+  ],
+  "result": "yoyos:collecting_items",
+  "tools": {
+    "item": "yoyos:yoyo"
+  }
+}
